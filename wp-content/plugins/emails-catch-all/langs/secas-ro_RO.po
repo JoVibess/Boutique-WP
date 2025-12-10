@@ -1,0 +1,538 @@
+# Copyright (C) 2016-2024 Iulia Cazan
+# This file is distributed under the GPL2.
+msgid ""
+msgstr ""
+"Project-Id-Version: Emails Catch All 3.5.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/secas\n"
+"POT-Creation-Date: 2024-11-10T15:52:24+00:00\n"
+"PO-Revision-Date: 2024-11-10 19:02+0200\n"
+"Last-Translator: Iulia Cazan\n"
+"Language-Team: \n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && n%100<=19) ? 1 : 2);\n"
+"X-Generator: Poedit 3.5\n"
+"X-Domain: secas\n"
+
+#. Plugin Name of the plugin
+#: emails-catch-all.php emails-catch-all.php:477 emails-catch-all.php:478 emails-catch-all.php:491 emails-catch-all.php:492
+#: emails-catch-all.php:1064 emails-catch-all.php:1673
+msgid "Emails Catch All"
+msgstr "Emails Catch All"
+
+#. Plugin URI of the plugin
+#: emails-catch-all.php
+msgid "https://iuliacazan.ro/emails-catch-all/"
+msgstr ""
+
+#. Description of the plugin
+#: emails-catch-all.php
+msgid ""
+"This plugin allows you to configure an email address that can receive a copy or replace the recipients of all the emails sent from the site. "
+"Additionally, you can set the content type, keep a log of outgoing messages, apply SMTP settings, or disable all emails."
+msgstr ""
+"Acest modul îți permite să configurezi o adresă email care poate primi o copie sau poate înlocui destinatarii tuturor emailurilor trimise de pe "
+"site. În plus, poți seta tipul de conținut, poți păstra un jurnal al mesajelor trimise, poți aplica setările SMTP sau să dezactivezi toate "
+"emailurile."
+
+#. Author of the plugin
+#: emails-catch-all.php
+msgid "Iulia Cazan"
+msgstr ""
+
+#. Author URI of the plugin
+#: emails-catch-all.php
+msgid "https://profiles.wordpress.org/iulia-cazan"
+msgstr ""
+
+#: emails-catch-all.php:523
+msgid "Are you sure you want to delete all the records?"
+msgstr "Sigur vrei să ștergi toate înregistrările?"
+
+#: emails-catch-all.php:524
+msgid "Are you sure you want to delete this record?"
+msgstr "Sigur vrei să ștergi această înregistrare?"
+
+#: emails-catch-all.php:568 emails-catch-all.php:993 emails-catch-all.php:1038
+msgid "Action not allowed."
+msgstr "Acțiunea nu este permisă."
+
+#. Translators: %s site name.
+#: emails-catch-all.php:673 inc/dummy.php:59
+msgid "[%s] Test Email Catch All"
+msgstr "[%s] Testează Email Catch All"
+
+#. Translators: %1$s from %2$s date %3$s to %4$s url.
+#: emails-catch-all.php:676 inc/dummy.php:79
+msgid ""
+"This is <em>a sample test email</em> from <b>%1$s</b>, sent on <u>%2$s</u>, having the initial recipient <b>%3$s</b>.<br />Visit the site at <a "
+"href=\"%4$s\">%4$s</a>"
+msgstr ""
+"Acesta este <em>un exemplu de email pentru testare</em> de la <b>%1$s</b>, trimis pe <u>%2$s</u>, având destinatarul inițial <b>%3$s</b>.<br /"
+">Vizitează site-ul la <a href=\"%4$s\">%4$s</a>"
+
+#: emails-catch-all.php:724
+msgid "An error has occurred when sending the test email: "
+msgstr "A apărut o eroare în timpul trimiterii mesajului pentru testare: "
+
+#: emails-catch-all.php:737
+msgid "Success! The test message has been sent."
+msgstr "Succes! Mesajul pentru testare a fost trimis."
+
+#: emails-catch-all.php:746
+msgid "Success! The settings have been updated."
+msgstr "Succes! Setările au fost actualizate."
+
+#: emails-catch-all.php:757
+msgid "Never"
+msgstr "Niciodată"
+
+#. Translators: %d - one day, %d - multiple days.
+#: emails-catch-all.php:760
+msgid "After one day"
+msgid_plural "After %d days"
+msgstr[0] "După o zi"
+msgstr[1] "După %d zile"
+msgstr[2] "După %d de zile"
+
+#. Translators: %1$d - current page, %2$d - total pages.
+#: emails-catch-all.php:796
+msgid "Page %1$d of %2$d"
+msgstr "Pagina %1$d din %2$d"
+
+#: emails-catch-all.php:870
+msgid "Refresh the listing"
+msgstr "Reîmprospătează afișarea"
+
+#: emails-catch-all.php:874
+msgid "records"
+msgstr "înregistrări"
+
+#: emails-catch-all.php:887
+msgid "Reset the site emails history"
+msgstr "Resetează istoricul emailurilor pe site"
+
+#: emails-catch-all.php:889
+msgid "Reset the emails history"
+msgstr "Resetează istoricul emailurilor"
+
+#: emails-catch-all.php:1069
+msgid "The plugin settings will not be applied. You must set up the recipient email address in the general settings tab."
+msgstr "Setările modulului nu vor fi aplicate. Trebuie să configurezi adresa de e-mail a destinatarului în fila de Setări generale."
+
+#: emails-catch-all.php:1105
+msgid "The emails log is not available"
+msgstr "Jurnalul emailuri nu este disponibil"
+
+#: emails-catch-all.php:1107
+msgid "Use the general settings to enable the option for recording the emails."
+msgstr "Folosește setările generale pentru a activa opțiunea de înregistrare a emailurilor."
+
+#: emails-catch-all.php:1162
+msgid "No sites"
+msgstr "Niciun site"
+
+#: emails-catch-all.php:1574 inc/tab-3.php:66
+msgid "Settings"
+msgstr "Setări"
+
+#: emails-catch-all.php:1576
+msgid "Network Settings"
+msgstr "Setări rețea"
+
+#: emails-catch-all.php:1579
+msgid "Plugin URL"
+msgstr "URL modul"
+
+#. Translators: %1$s - plugin name.
+#: emails-catch-all.php:1677
+msgid "%1$s plugin was activated!"
+msgstr "Modulul %1$s a fost activat!"
+
+#. Translators: %1$s - plugins URL, %2$s - heart, %3$s - extensions URL, %4$s - star, %5$s - pro.
+#: emails-catch-all.php:1681
+msgid ""
+"%5$sCheck out my other <a href=\"%1$s\" target=\"_blank\" rel=\"noreferrer\">%2$s free plugins</a> on WordPress.org and the <a href=\"%3$s\" "
+"target=\"_blank\" rel=\"noreferrer\">%4$s other extensions</a> available!"
+msgstr ""
+"%5$sVezi și celelalte <a href=\"%1$s\" target=\"_blank\" rel=\"noreferrer\">%2$s module gratuite</a> ale mele pe WordPress.org și <a "
+"href=\"%3$s\" target=\"_blank\" rel=\"noreferrer\">%4$s extensiile premium</a> disponibile!"
+
+#: emails-catch-all.php:1701
+msgid "Dismiss this notice."
+msgstr "Respinge această notificare."
+
+#: emails-catch-all.php:1720
+msgid "A huge thanks in advance!"
+msgstr "Multe mulțumiri în avans!"
+
+#. Translators: %1$s - donate URL, %2$s - rating, %3$s - thanks.
+#: emails-catch-all.php:1724
+msgid ""
+"If you find the plugin useful and would like to support my work, please consider making a <a href=\"%1$s\" target=\"_blank\">donation</a>. It "
+"would make me very happy if you would leave a %2$s rating. %3$s"
+msgstr ""
+"Dacă acest modul îți este folositor și ai dori să îmi sprijini munca, m-aș bucura dacă ai face o <a href=\"%1$s\" target=\"_blank\">donație</a>. "
+"M-ar bucura mult dacă ai lăsa și o recenzie de %2$s. %3$s"
+
+#: inc/menu.php:14
+msgid "Emails Log"
+msgstr "Jurnalul emailuri"
+
+#: inc/menu.php:20 inc/menu.php:37
+msgid "General Settings"
+msgstr "Setări generale"
+
+#: inc/menu.php:26 inc/menu.php:31 inc/menu.php:41
+msgid "SMTP Settings"
+msgstr "Setări SMTP"
+
+#: inc/menu.php:48
+msgid "Sites Settings"
+msgstr "Setări site"
+
+#: inc/page.php:144 inc/page.php:158 inc/page.php:250
+msgid "Date"
+msgstr "Dată"
+
+#: inc/page.php:146 inc/page.php:165 inc/page.php:264 inc/tab-3.php:13 inc/tab-3.php:26
+msgid "Blog"
+msgstr "Blog"
+
+#: inc/page.php:148 inc/page.php:268 inc/page.php:271
+msgid "From"
+msgstr "De la"
+
+#: inc/page.php:149 inc/page.php:280
+msgid "Intended Recipient"
+msgstr "Destinatar vizat"
+
+#: inc/page.php:150 inc/page.php:283
+msgid "Final Recipient"
+msgstr "Destinatar final"
+
+#: inc/page.php:151 inc/page.php:306
+msgid "Subject"
+msgstr "Subiect"
+
+#: inc/page.php:151 inc/page.php:306
+msgid "Message"
+msgstr "Mesaj"
+
+#: inc/page.php:167
+msgid "Any"
+msgstr "Oricare"
+
+#: inc/page.php:185
+msgid "Intended or final recipient email address"
+msgstr "Adresă email destinatar vizat sau final"
+
+#: inc/page.php:190
+msgid "Subject or content of the message"
+msgstr "Subiect sau conținut pentru mesaj"
+
+#: inc/page.php:195
+msgid "Search"
+msgstr "Caută"
+
+#: inc/page.php:196
+msgid "Reset"
+msgstr "Resetează"
+
+#: inc/page.php:206
+msgid "No recorded history for the selected site."
+msgstr "Niciun istoric înregistrat pentru site-ul selectat."
+
+#: inc/page.php:212
+msgid "No recorded history."
+msgstr "Niciun istoric înregistrat."
+
+#: inc/page.php:224
+msgid "TO"
+msgstr "TO"
+
+#: inc/page.php:226
+msgid "CC"
+msgstr "CC"
+
+#: inc/page.php:229
+msgid "BCC"
+msgstr "BCC"
+
+#: inc/page.php:255
+msgid "Delete"
+msgstr "Șterge"
+
+#: inc/page.php:288
+msgid "Final"
+msgstr "Final"
+
+#: inc/page.php:302
+msgid "Type"
+msgstr "Tip"
+
+#: inc/tab-0.php:20 inc/tab-0.php:32
+msgid "More options"
+msgstr "Mai multe opțiuni"
+
+#: inc/tab-0.php:27 inc/tab-1.php:82
+msgid "Log only"
+msgstr "Doar jurnal"
+
+#: inc/tab-0.php:39
+msgid "Compact view"
+msgstr "Vizualizare compactă"
+
+#: inc/tab-0.php:44
+msgid "Cleanup settings and records on deactivate"
+msgstr "Șterge setările și înregistrările la dezactivare"
+
+#: inc/tab-0.php:49 inc/tab-1.php:160
+msgid "Test the settings"
+msgstr "Testează setările"
+
+#: inc/tab-0.php:54
+msgid "Log cleanup"
+msgstr "Curățare jurnal"
+
+#: inc/tab-0.php:62
+msgid "Save"
+msgstr "Salvează"
+
+#: inc/tab-1.php:11
+msgid "Recipients"
+msgstr "Destinatari"
+
+#: inc/tab-1.php:12
+msgid "Recipient email address"
+msgstr "Adresă email destinatar"
+
+#: inc/tab-1.php:15
+msgid "The email address (separate with , if you have more) that can receive a copy or replace the recipients of all the emails sent from the site"
+msgstr ""
+"Adresa email (separă-le cu , dacă ai mai multe) care poate primi o copie sau poate înlocui destinatarii tuturor emailurilor trimise de pe site"
+
+#: inc/tab-1.php:20
+msgid "Recipient Type"
+msgstr "Tip de destinatar"
+
+#: inc/tab-1.php:29
+msgid "default"
+msgstr "implicit"
+
+#: inc/tab-1.php:32
+msgid "The default recipients of the messages, without any custom changes"
+msgstr "Destinatarii impliciți ai mesajelor, fără modificări personalizate"
+
+#: inc/tab-1.php:42
+msgid "receive a copy"
+msgstr "primește o copie"
+
+#: inc/tab-1.php:45
+msgid ""
+"The emails will be sent to the intended recipients as normal + a copy of all emails will be sent also to the catch all email address specified"
+msgstr ""
+"Emailurile vor fi trimise la destinatarii vizați ca în mod normal + o copie a tuturor emailurilor se va trimite și adresei email specificată "
+"pentru a prinde tot"
+
+#: inc/tab-1.php:55
+msgid "replace all recipients"
+msgstr "înlocuiește toți destinatarii"
+
+#: inc/tab-1.php:58
+msgid "The emails will be sent only to the catch all email address you specified, the intended recipient will not receive the emails"
+msgstr "Emailurile vor fi trimise numai la adresa email pe care ai specificat-o să prindă tot, destinatarii vizați nu vor primi emailurile"
+
+#: inc/tab-1.php:68
+msgid "disable all emails"
+msgstr "dezactivează toate emailurile"
+
+#: inc/tab-1.php:71
+msgid "The emails will not be sent"
+msgstr "Emailurile nu se vor trimite"
+
+#: inc/tab-1.php:85
+msgid "The emails will only be recorded"
+msgstr "Emailurile vor fi doar înregistrate"
+
+#: inc/tab-1.php:91
+msgid "Content Type"
+msgstr "Tip de conținut"
+
+#: inc/tab-1.php:99
+msgid "Auto"
+msgstr "Automat"
+
+#: inc/tab-1.php:107
+msgid "Plain Text"
+msgstr "Text simplu"
+
+#: inc/tab-1.php:115
+msgid "HTML"
+msgstr "HTML"
+
+#: inc/tab-1.php:118
+msgid "The content type for email sent through"
+msgstr "Tipul de conținut pentru emailurile trimise"
+
+#: inc/tab-1.php:122
+msgid "Record Emails"
+msgstr "Înregistrează emailurile"
+
+#: inc/tab-1.php:127 inc/tab-2.php:20
+msgid "No"
+msgstr "Nu"
+
+#: inc/tab-1.php:132 inc/tab-2.php:16
+msgid "Yes"
+msgstr "Da"
+
+#: inc/tab-1.php:136
+msgid "Record the emails for later review"
+msgstr "Înregistrează emailurile pentru revizuiri ulterioare"
+
+#: inc/tab-1.php:141 inc/tab-1.php:142
+msgid "Cleanup Interval"
+msgstr "Interval de ștergere"
+
+#: inc/tab-1.php:147
+msgid "Cleanup the emails from the history log after a number of days (recommended)"
+msgstr "Șterge emailurile din jurnalul istoric după un număr de zile (recomandat)"
+
+#: inc/tab-1.php:153
+msgid "Test"
+msgstr "Testează"
+
+#: inc/tab-1.php:155
+msgid "Test email address"
+msgstr "Testează adresa de email"
+
+#: inc/tab-1.php:162
+msgid "Set up the recipient email (separate with , if you have more). Leave empty to use the admin email"
+msgstr "Configurează e-mailul destinatarului (separă-le cu , dacă sunt mai multe). Lasă gol pentru a utiliza e-mailul de administrator"
+
+#: inc/tab-1.php:170
+msgid "Dummy Records"
+msgstr "Înregistrări fictive"
+
+#: inc/tab-1.php:173
+msgid "Add random dummy data"
+msgstr "Adaugă date fictive în mod aleatoriu"
+
+#: inc/tab-1.php:175
+msgid "This is only for testing purpose, no emails are sent out"
+msgstr "Aceasta este numai pentru testare, nu este trimis niciun email"
+
+#: inc/tab-1.php:182 inc/tab-2.php:87 inc/tab-3.php:79
+msgid "Update Settings"
+msgstr "Actualizează setările"
+
+#: inc/tab-2.php:12
+msgid "SMTP Auth"
+msgstr "Autentificare SMTP"
+
+#: inc/tab-2.php:23
+msgid "Enable SMTP authentication"
+msgstr "Activează autentificarea SMTP"
+
+#: inc/tab-2.php:27 inc/tab-2.php:28
+msgid "Host"
+msgstr "Gazdă"
+
+#: inc/tab-2.php:30
+msgid "Specify the SMTP servers (separate with ; if you have more, for example: smtp1.dom.com;smtp2.dom.com)"
+msgstr "Specifică serverele SMTP (dacă sunt mai multe, separă-le cu ;. De exemplu: smtp1.dom.com;smtp2.dom.com)"
+
+#: inc/tab-2.php:34 inc/tab-2.php:35
+msgid "Port"
+msgstr "Port"
+
+#: inc/tab-2.php:37
+msgid "The TCP port to connect to"
+msgstr "Portul de conectare prin TCP"
+
+#: inc/tab-2.php:41 inc/tab-2.php:42
+msgid "Username"
+msgstr "Nume utilizator"
+
+#: inc/tab-2.php:44
+msgid "SMTP username (for example user@yourdomain.com)"
+msgstr "Nume utilizator SMTP (de exemplu, user@yourdomain.com)"
+
+#: inc/tab-2.php:48 inc/tab-2.php:49
+msgid "Password"
+msgstr "Parolă"
+
+#: inc/tab-2.php:51
+msgid "SMTP password"
+msgstr "Parolă SMTP"
+
+#: inc/tab-2.php:55
+msgid "SMTP Secure"
+msgstr "SMTP securizat"
+
+#: inc/tab-2.php:59
+msgid "TLS"
+msgstr "TLS"
+
+#: inc/tab-2.php:63
+msgid "SSL"
+msgstr "SSL"
+
+#: inc/tab-2.php:67
+msgid "N/A"
+msgstr "N/A"
+
+#: inc/tab-2.php:70
+msgid "Enable TLS or SSL encryption (use N/A if you are not sure what option to select)"
+msgstr "Activează criptarea TLS sau SSL (folosește N/A dacă nu ești sigur ce opțiune să alegi)"
+
+#: inc/tab-2.php:74 inc/tab-2.php:75
+msgid "From Email"
+msgstr "Email expeditor"
+
+#: inc/tab-2.php:77
+msgid "The email address to be used as from for the emails"
+msgstr "Adresa de email care va fi folosită ca expeditor pentru emailuri"
+
+#: inc/tab-2.php:80 inc/tab-2.php:81
+msgid "From Name"
+msgstr "Nume expeditor"
+
+#: inc/tab-2.php:83
+msgid "The name to be used as from for the emails"
+msgstr "Numele care va fi folosit ca expeditor pentru emailuri"
+
+#: inc/tab-3.php:14 inc/tab-3.php:29
+msgid "Name"
+msgstr "Nume"
+
+#: inc/tab-3.php:15 inc/tab-3.php:32
+msgid "URL"
+msgstr "URL"
+
+#: inc/tab-3.php:16 inc/tab-3.php:35 inc/tab-3.php:36
+msgid "Enabled"
+msgstr "Activat"
+
+#: inc/tab-3.php:17 inc/tab-3.php:45 inc/tab-3.php:46
+msgid "Inherit"
+msgstr "Moștenire"
+
+#: inc/tab-3.php:18 inc/tab-3.php:56
+msgid "Summary"
+msgstr "Rezumat"
+
+#: inc/tab-3.php:19
+msgid "Site Settings"
+msgstr "Setări site"
+
+#: inc/tab-3.php:68
+msgid "Go to settings"
+msgstr "Mergi la Setări"
+
+#: inc/tab-3.php:71
+msgid "inherits the network settings (no settings panel for the site)"
+msgstr "moștenește setările rețelei (fără panou Setări pentru site)"

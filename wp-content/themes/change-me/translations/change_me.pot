@@ -1,0 +1,4 @@
+# Copyright (C) 2021 Automattic
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""

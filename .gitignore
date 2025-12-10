@@ -1,0 +1,90 @@
+############################################
+# 1. SYSTÈME D’EXPLOITATION (macOS)
+############################################
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+############################################
+# 2. IDE & ÉDITEURS (PhpStorm / JetBrains)
+############################################
+.idea/
+*.iml
+# (optionnel) VS Code si vous l’utilisez ponctuellement
+.vscode/
+
+############################################
+# 3. OUTILS ET DÉPENDANCES
+############################################
+# Composer
+/vendor/
+# Node
+node_modules/
+# Yarn / pnpm / Bun caches
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+.pnpm-store/
+.bun/
+
+/wp-content/upgrade/*
+/wp-content/uploads/*
+/wp-content/uploads-webpc/*
+/wp-content/debug.log
+/wp-content/languages
+/tools
+
+############################################
+# 5. WORDPRESS CORE
+############################################
+# On ignore tout sauf wp-content
+wordpress/
+license.txt
+readme.html
+# Fichier de config principal (gardez-le hors dépôt
+# ou gérez-le via un sample commité)
+wp-config.php
+
+############################################
+# 6. WP-CONTENT : DOSSIERS À NE PAS VERSIONNER
+############################################
+# Médias & caches : générés à la volée
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backups/
+wp-content/backup-*/          # plugins de backup divers
+wp-content/blogs.dir/         # multisite < WP 3.5
+wp-content/debug.log
+# WooCommerce
+wp-content/uploads/wc-logs/
+wp-content/uploads/wc-downloads/
+woocommerce.csv
+woocommerce.log
+
+
+############################################
+# 9. LOGS & TEMPORAIRES
+############################################
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+php_error.log
+composer.lock # <- ignorez-le seulement si vous gérez vos versions autrement
+
+############################################
+# 10. AUTRES (ajustez selon votre stack)
+############################################
+# Tests, reports, IDE partagés, etc.
+coverage/
+phpunit.xml
+.phpunit.result.cache
+

@@ -1,0 +1,65 @@
+{
+  "name": "genesii-starter",
+  "version": "1.1.0",
+  "description": "[![Build Status](https://travis-ci.org/Automattic/_s.svg?branch=master)](https://travis-ci.org/Automattic/_s)",
+  "main": "postcss.config.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "watch": "webpack --watch --mode development --max-old-space-size=4096",
+    "build": "webpack --mode production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^9.1.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "copy-webpack-plugin": "^4.5.2",
+    "css-loader": "^1.0.0",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^1.1.11",
+    "font-awesome-loader": "^1.0.2",
+    "less-loader": "^4.1.0",
+    "postcss-loader": "^3.0.0",
+    "sass": "^1.89.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.22.1",
+    "url-loader": "^1.1.0",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.4",
+    "@vimeo/player": "^2.16.2",
+    "aos": "^2.3.4",
+    "autonumeric": "^4.6.0",
+    "bootstrap": "^5.2.3",
+    "browserslist": "^4.21.5",
+    "dom-to-image": "^2.6.0",
+    "font-awesome": "^4.7.0",
+    "font-awesome-webpack": "0.0.5-beta.2",
+    "font-awesome-webpack-4": "^1.0.0",
+    "hammerjs": "^2.0.8",
+    "html2canvas": "^1.4.1",
+    "imagesloaded": "^5.0.0",
+    "isotope-layout": "^3.0.6",
+    "jquery": "^3.3.1",
+    "jquery-bridget": "^3.0.0",
+    "jquery-ui-touch-punch": "^0.2.3",
+    "js-cookie": "^3.0.1",
+    "less": "^3.8.1",
+    "masonry-layout": "^4.2.2",
+    "owl.carousel": "^2.3.4",
+    "popper.js": "^1.14.4",
+    "swiper": "^11.2.6",
+    "webpack-jquery-ui": "^2.0.1"
+  },
+  "engines" : { 
+    "node" : ">=18.0.0"
+  }
+}

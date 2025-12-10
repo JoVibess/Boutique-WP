@@ -1,0 +1,59 @@
+{
+    "name": "genesii/wordpress-module",
+    "description": "Base de module wordpress.",
+    "type": "project",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Genesii\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Adam Macheda",
+            "email": "adam.macheda@genesii.fr"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "genesii/wordpress-module-kernel": "6.*"
+    },
+    "scripts": {
+        "auto-scripts": [
+            "Genesii\\Kernel\\Command\\Composer::postInstall"
+        ],
+        "make:post-type": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "make:shortcode": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "make:service": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "make:template": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "make:acf:sync": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "make:taxonomy": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "make:acf:option-page": [
+            "Genesii\\Kernel\\Command\\Composer::maker"
+        ],
+        "post-create-project-cmd": [
+            "@auto-scripts"
+        ]
+    },
+    "scripts-descriptions": {
+        "make:post-type": "Génère un type de contenu, ses templates et sa classe",
+        "make:taxonomy": "Génère une taxonomie pour un type de contenu",
+        "make:shortcode": "Génère un shortcode et son template",
+        "make:service": "Génère un service (actions branchées à des hooks)",
+        "make:template": "Génère un template de page",
+        "make:acf:sync": "Ajoute et sauvegarde un groupe de champs ACF dans le module",
+        "make:acf:option-page": "Ajoute une page d'options pour ACF dans le back office"
+    }
+}
