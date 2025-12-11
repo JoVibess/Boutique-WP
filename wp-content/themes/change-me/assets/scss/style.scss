@@ -1,3 +1,61 @@
-body {
+@import "_fonts";
+@import "_variables";
+@import "_header";
+@import "_footer";
 
+@import "~bootstrap/scss/bootstrap";
+
+/* ---- RESET / BASE ---- */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: $text;
+  background: $secondary;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Liens */
+a {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Images responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Listes sans styles */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+main {
+  flex: 1;
+}
+
+.site-footer {
+  margin-top: auto;
 }

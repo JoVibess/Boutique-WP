@@ -12,3 +12,15 @@ $bp-xl: 1200px;
 $bp-lg: 992px;
 $bp-md: 768px;
 $bp-sm: 576px;
+
+
+// COULEURS
+$primary : #15191d;
+$secondary : #f6f5f5;
+$text : #15191d;
+$text-gray : #999999;
+
+// Boutons
+$btn-bg       : $primary;
+$btn-bg-hover : darken($primary, 5%);
+$btn-text     : #ffffff;

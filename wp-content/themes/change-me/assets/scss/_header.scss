@@ -1,0 +1,156 @@
+/* ------------------------------
+   HEADER
+------------------------------ */
+
+.site-header {
+    background: $secondary;
+    color: $text;
+}
+
+/* Bandeau top animé */
+.top-bar {
+    background: $primary;
+    color: #fff;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.4rem 0;
+}
+
+.top-bar-track {
+    display: inline-flex;
+    gap: 3rem;
+    animation: marquee 20s linear infinite;
+    will-change: transform;
+
+    span {
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        font-size: .75rem;
+        font-weight: 500;
+    }
+}
+
+@keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-33.33%); }
+}
+
+
+
+.header-nav {
+    background: $secondary;
+    border-bottom: 1px solid lighten($primary, 65%);
+    padding: 0.75rem 0;
+
+    .navbar-brand {
+        font-size: 1.4rem;
+        color: $primary;
+        text-decoration: none;
+
+        &:hover {
+            color: darken($primary, 15%);
+        }
+    }
+
+    .main-menu {
+        display: flex;
+        gap: 1.5rem;
+
+        .menu-item {
+            position: relative;
+
+            > a {
+                color: $primary;
+                font-weight: 500;
+                padding: 0.5rem 0.75rem;
+                display: block;
+
+                &:hover,
+                &.active {
+                    color: darken($primary, 15%);
+                }
+            }
+        }
+
+        /* DROPDOWN */
+        .dropdown,
+        .menu-item-has-children {
+            position: relative;
+
+            > a {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+
+                // Supprimer le triangle Bootstrap
+                &::after {
+                    display: none !important;
+                    content: none !important;
+                    border: none !important;
+                }
+
+                .chevron-icon {
+                    transition: transform 0.3s ease;
+                    transform: rotate(-90deg);
+
+                    path {
+                        stroke: $primary;
+                    }
+                }
+            }
+
+            .dropdown-menu,
+            .sub-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                background: #fff;
+                border: 1px solid lighten($primary, 70%);
+                padding: 0.5rem 0;
+                min-width: 180px;
+                z-index: 50;
+                list-style: none;
+
+                a {
+                    display: block;
+                    padding: 0.5rem 1rem;
+                    color: $primary;
+
+                    &:hover {
+                        background: lighten($primary, 68%);
+                    }
+                }
+            }
+
+            /* Active state - menu ouvert */
+            &.active {
+                > a .chevron-icon {
+                    transform: rotate(0deg);
+                }
+
+                > .dropdown-menu,
+                > .sub-menu {
+                    display: block;
+                }
+            }
+        }
+    }
+}
+
+/* ICONS */
+.header-icons .icon {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+
+    svg {
+        width: 20px;
+        height: 20px;
+    }
+    &:hover {
+        opacity: 0.7;
+    }
+}

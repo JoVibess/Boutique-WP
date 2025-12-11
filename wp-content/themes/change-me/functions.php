@@ -115,6 +115,7 @@ function genesii_slugify($str)
 add_theme_support( 'menus' );
 function register_menus() {
     register_nav_menus(array(
+            'header_menu' => 'Menu Principal (Header)',
             'primary' => 'Primary',
         )
     );

@@ -1,0 +1,32 @@
+.site-footer {
+    background: $secondary;
+    color: $text;
+    padding: 16px;
+
+    a {
+        color: $text-gray;
+        text-decoration: none;
+
+        &:hover {
+            color: darken($text-gray, 20%);
+        }
+    }
+
+    h6 {
+        color: $primary;
+    }
+
+    input.form-control {
+        border-radius: 0;
+        border-color: lighten($primary, 70%);
+    }
+
+    .btn {
+        background: $primary;
+        color: #fff;
+
+        &:hover {
+            background: $btn-bg-hover;
+        }
+    }
+}
