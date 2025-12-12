@@ -7,32 +7,50 @@
     color: $text;
 }
 
-/* Bandeau top animé */
 .top-bar {
     background: $primary;
     color: #fff;
     overflow: hidden;
     white-space: nowrap;
-    padding: 0.4rem 0;
+    height: 36px;
+    display: flex;
+    align-items: center;
 }
 
 .top-bar-track {
-    display: inline-flex;
+    display: flex;
+    width: max-content;
+    animation: marquee 18s linear infinite;
+}
+
+.top-bar-content {
+    display: flex;
+    align-items: center;
     gap: 3rem;
-    animation: marquee 20s linear infinite;
-    will-change: transform;
+    padding-right: 3rem;
 
     span {
-        text-transform: uppercase;
-        letter-spacing: .06em;
         font-size: .75rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
         font-weight: 500;
+        opacity: .9;
     }
 }
 
+/* Animation infinie sans trou */
 @keyframes marquee {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-33.33%); }
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* Pause au hover (optionnel) */
+.top-bar:hover .top-bar-track {
+    animation-play-state: paused;
 }
 
 
@@ -103,7 +121,7 @@
             .sub-menu {
                 display: none;
                 position: absolute;
-                top: 100%;
+                top: 52px;
                 left: 0;
                 background: #fff;
                 border: 1px solid lighten($primary, 70%);
@@ -115,13 +133,17 @@
                 a {
                     display: block;
                     padding: 0.5rem 1rem;
-                    color: $primary;
-
-                    &:hover {
-                        background: lighten($primary, 68%);
+                    color: $text-gray;
+                    position: relative;
+                    transition: transform .18s ease, color .18s ease, background-color .18s ease;
+                
+                    &:hover,
+                    &:focus-visible {
+                      transform: translateX(6px);
+                      color: $primary;
                     }
+                  }
                 }
-            }
 
             /* Active state - menu ouvert */
             &.active {

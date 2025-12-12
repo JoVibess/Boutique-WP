@@ -18,14 +18,76 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// ========================================
+// TOP BAR - Bandeau défilant infini
+// ========================================
 document.addEventListener("DOMContentLoaded", () => {
+    const topBar = document.querySelector(".top-bar");
     const track = document.querySelector(".top-bar-track");
 
-    if (track) {
-        // Dupliquer le contenu pour avoir un défilement infini sans coupure
-        const content = track.innerHTML;
-        track.innerHTML = content + content + content;
+    if (!track || !topBar) return;
+
+    // Cloner le contenu original
+    const originalContent = track.cloneNode(true);
+    const clonedTrack = originalContent.cloneNode(true);
+    clonedTrack.classList.add("cloned");
+
+    // Ajouter le clone au conteneur
+    topBar.appendChild(clonedTrack);
+
+    // Calculer les dimensions
+    const trackWidth = track.offsetWidth;
+    const containerWidth = topBar.offsetWidth;
+
+    // Définir la durée de l'animation (en secondes)
+    const animationDuration = 20;
+
+    // Position de départ et d'arrivée
+    let position1 = 0;
+    let position2 = trackWidth;
+
+    // Variable pour gérer la pause
+    let isPaused = false;
+
+    // Fonction d'animation
+    function animate() {
+        if (!isPaused) {
+            // Vitesse en pixels par frame
+            const speed = trackWidth / (animationDuration * 60); // 60 fps
+
+            // Déplacer les deux tracks
+            position1 -= speed;
+            position2 -= speed;
+
+            // Reset quand le premier track est complètement sorti
+            if (position1 <= -trackWidth) {
+                position1 = trackWidth;
+            }
+
+            // Reset quand le deuxième track est complètement sorti
+            if (position2 <= -trackWidth) {
+                position2 = trackWidth;
+            }
+
+            // Appliquer les transformations
+            track.style.transform = `translateX(${position1}px)`;
+            clonedTrack.style.transform = `translateX(${position2}px)`;
+        }
+
+        requestAnimationFrame(animate);
     }
+
+    // Démarrer l'animation
+    animate();
+
+    // Pause au hover (optionnel)
+    topBar.addEventListener("mouseenter", () => {
+        isPaused = true;
+    });
+
+    topBar.addEventListener("mouseleave", () => {
+        isPaused = false;
+    });
 });
 
 // Gestion des menus dropdown avec rotation du chevron
@@ -82,3 +144,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Popup search
+
+document.addEventListener('DOMContentLoaded', () => {
+    const openBtn  = document.querySelector('.search-icon');
+    const overlay  = document.getElementById('searchOverlay');
+    const closeBtn = overlay.querySelector('.search-overlay__close');
+    const backdrop = overlay.querySelector('.search-overlay__backdrop');
+    const input    = overlay.querySelector('.search-field');
+
+    function openSearch(e) {
+        e.preventDefault();
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        setTimeout(() => input.focus(), 150);
+    }
+
+    function closeSearch() {
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    openBtn.addEventListener('click', openSearch);
+    closeBtn.addEventListener('click', closeSearch);
+    backdrop.addEventListener('click', closeSearch);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSearch();
+    });
+});
