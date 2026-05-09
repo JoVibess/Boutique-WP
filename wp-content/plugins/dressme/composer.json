@@ -1,0 +1,20 @@
+{
+    "name": "genesii/dressme-wordpress-plugin",
+    "description": "DressMe WooCommerce plugin.",
+    "type": "project",
+    "license": "proprietary",
+    "autoload": {
+        "psr-4": {
+            "Genesii\\DressMe\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Genesii"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "genesii/wordpress-module-kernel": "6.*"
+    }
+}

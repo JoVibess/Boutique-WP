@@ -1,0 +1,76 @@
+.dressme-settings-table th {
+  width: 240px;
+}
+
+.dressme-product-overrides {
+  max-width: 960px;
+}
+
+.dressme-product-overrides__controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dressme-product-overrides__controls .wc-product-search {
+  min-width: 360px;
+}
+
+.dressme-product-overrides table td,
+.dressme-product-overrides table th {
+  vertical-align: middle;
+}
+
+.dressme-button-preview {
+  max-width: 960px;
+  margin: 18px 0 28px;
+  padding: 18px;
+  border: 1px solid #d7e1ea;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8fbfd 0%, #eef4f8 100%);
+}
+
+.dressme-button-preview__label {
+  margin: 0 0 14px;
+  font-weight: 600;
+}
+
+.dressme-button-preview__stage {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 120px;
+  padding: 18px;
+  border-radius: 12px;
+  background:
+    linear-gradient(45deg, rgba(17, 17, 17, 0.035) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(17, 17, 17, 0.035) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(17, 17, 17, 0.035) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(17, 17, 17, 0.035) 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+}
+
+.dressme-button-preview__button {
+  --dressme-preview-bg: #111111;
+  --dressme-preview-color: #ffffff;
+  --dressme-preview-hover-bg: #2d2d2d;
+  --dressme-preview-hover-color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  padding: 0 24px;
+  border: 0;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--dressme-preview-bg);
+  color: var(--dressme-preview-color);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dressme-button-preview__button:hover {
+  background: var(--dressme-preview-hover-bg);
+  color: var(--dressme-preview-hover-color);
+}
