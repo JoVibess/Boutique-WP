@@ -96,6 +96,22 @@
     }
   }
 
+  function buildTryOnRequestBody(visitorId, customerImage) {
+    const body = new URLSearchParams();
+
+    body.set("action", "dressme_try_on_request");
+    body.set("nonce", config.nonce || "");
+    body.set("anonymous_visitor_id", visitorId);
+    body.set("customer_image", customerImage);
+    body.set("product_payload", JSON.stringify(config.productPayload || {}));
+
+    return body;
+  }
+
+  function formatMessage(template, value) {
+    return String(template || "").replace("%s", value);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const modal = document.querySelector("[data-dressme-modal]");
     const openButton = document.querySelector("[data-dressme-open-modal]");
@@ -106,7 +122,8 @@
 
     hydrateButtonStyles(openButton);
 
-    createVisitorId();
+    const visitorId = createVisitorId();
+    let selectedCustomerImage = "";
 
     const preview = modal.querySelector("[data-dressme-preview]");
     const feedback = modal.querySelector("[data-dressme-feedback]");
@@ -157,17 +174,54 @@
 
       const reader = new FileReader();
       reader.onload = function () {
-        preview.innerHTML = `<img src="${reader.result}" alt="DressMe preview">`;
-        generateButton.removeAttribute("disabled");
+        selectedCustomerImage = String(reader.result || "");
+        preview.innerHTML = `<img src="${selectedCustomerImage}" alt="DressMe preview">`;
+
+        if (config.isConfigured) {
+          generateButton.removeAttribute("disabled");
+        }
+
         feedback.textContent = config.messages.uploadPrompt;
       };
 
       reader.readAsDataURL(file);
     });
 
-    generateButton?.addEventListener("click", function () {
-      feedback.textContent =
-        "Le plugin est prêt pour l’intégration Symfony. La génération réelle sera branchée dans la prochaine phase.";
+    generateButton?.addEventListener("click", async function () {
+      if (!config.isConfigured) {
+        updateFeedback(modal, config.messages.notConfigured);
+        return;
+      }
+
+      if (!selectedCustomerImage) {
+        updateFeedback(modal, config.messages.missingPhoto);
+        return;
+      }
+
+      generateButton.setAttribute("disabled", "disabled");
+      updateFeedback(modal, config.messages.sending);
+
+      try {
+        const response = await fetch(config.ajaxUrl, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          },
+          body: buildTryOnRequestBody(visitorId, selectedCustomerImage),
+        });
+        const payload = await response.json();
+        const data = payload && payload.data ? payload.data : {};
+
+        if (!response.ok || !payload.success) {
+          throw new Error(data.message || config.messages.failed);
+        }
+
+        updateFeedback(modal, formatMessage(config.messages.received, data.job_id || ""));
+      } catch (error) {
+        updateFeedback(modal, error.message || config.messages.failed);
+        generateButton.removeAttribute("disabled");
+      }
     });
   });
 })();

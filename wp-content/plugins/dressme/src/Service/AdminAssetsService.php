@@ -43,5 +43,17 @@ final class AdminAssetsService extends AbstractService
             '0.1.0',
             true
         );
+
+        if ($isDressMeSettings) {
+            wp_localize_script('dressme-admin', 'dressmeAdmin', [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'validateNonce' => wp_create_nonce('dressme_validate_key'),
+                'messages' => [
+                    'validating' => __('Validating API key...', 'dressme'),
+                    'success' => __('API key is valid.', 'dressme'),
+                    'error' => __('API key validation failed.', 'dressme'),
+                ],
+            ]);
+        }
     }
 }

@@ -81,5 +81,6 @@ add_action('plugins_loaded', static function () use ($dressmePath): void {
     new \Genesii\DressMe\Service\AdminAssetsService($dressmePath);
     new \Genesii\DressMe\Service\ProductSettingsService($dressmePath);
     new \Genesii\DressMe\Service\WooCommerceSettingsService($dressmePath);
+    new \Genesii\DressMe\Service\WordPressApiBridgeService($dressmePath);
     new \Genesii\DressMe\Service\ProductTryOnService($dressmePath);
 });

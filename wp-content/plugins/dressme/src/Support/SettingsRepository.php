@@ -22,7 +22,17 @@ final class SettingsRepository
 
     public function isConfigured(): bool
     {
-        return '' !== trim((string) $this->get(Options::API_KEY));
+        return '' !== $this->getApiKey() && '' !== $this->getApiBaseUrl();
+    }
+
+    public function getApiKey(): string
+    {
+        return trim((string) $this->get(Options::API_KEY));
+    }
+
+    public function getApiBaseUrl(): string
+    {
+        return untrailingslashit(trim((string) $this->get(Options::API_BASE_URL)));
     }
 
     public function getButtonLabel(): string

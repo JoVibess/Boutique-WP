@@ -1,0 +1,5 @@
+.git
+.DS_Store
+tmp
+wp-content/cache
+wp-content/uploads/cache

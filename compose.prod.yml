@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - wordpress-db-data:/var/lib/mysql
+
+  www:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_HOME: "https://boutique-test.joeydecroix.com"
+      WORDPRESS_SITEURL: "https://boutique-test.joeydecroix.com"
+      WP_ENVIRONMENT_TYPE: production
+    volumes:
+      - wordpress-uploads:/var/www/wp-content/uploads
+
+volumes:
+  wordpress-db-data:
+  wordpress-uploads:

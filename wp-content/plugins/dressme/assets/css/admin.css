@@ -74,3 +74,17 @@
   background: var(--dressme-preview-hover-bg);
   color: var(--dressme-preview-hover-color);
 }
+
+.dressme-api-validation-result {
+  display: inline-block;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.dressme-api-validation-result.is-success {
+  color: #1d6f42;
+}
+
+.dressme-api-validation-result.is-error {
+  color: #b32d2e;
+}

@@ -97,6 +97,8 @@
   $(function () {
     const $app = $("[data-dressme-overrides-app]");
     const $previewButton = $("[data-dressme-button-preview]");
+    const $validateButton = $("[data-dressme-validate-key]");
+    const $validationResult = $("[data-dressme-validation-result]");
 
     function updateButtonPreview() {
       if (!$previewButton.length) {
@@ -189,6 +191,46 @@
       '.dressme-style-input, input[name="dressme_button_label"]',
       updateButtonPreview
     );
+
+    $validateButton.on("click", function () {
+      if (!window.dressmeAdmin || !$validationResult.length) {
+        return;
+      }
+
+      $validateButton.prop("disabled", true);
+      $validationResult.removeClass("is-success is-error").text(dressmeAdmin.messages.validating);
+
+      $.post(dressmeAdmin.ajaxUrl, {
+        action: "dressme_validate_key",
+        nonce: dressmeAdmin.validateNonce,
+        api_base_url: $('input[name="dressme_api_base_url"]').val() || "",
+        api_key: $('input[name="dressme_api_key"]').val() || "",
+      })
+        .done(function (response) {
+          const data = response && response.data ? response.data : {};
+          const details = [
+            data.store_name,
+            Number.isFinite(Number(data.remaining_credits))
+              ? `${data.remaining_credits} crédit(s)`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" · ");
+
+          $validationResult
+            .addClass("is-success")
+            .text(details ? `${dressmeAdmin.messages.success} ${details}` : dressmeAdmin.messages.success);
+        })
+        .fail(function (xhr) {
+          const data = xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data : {};
+          const message = data.message || dressmeAdmin.messages.error;
+
+          $validationResult.addClass("is-error").text(message);
+        })
+        .always(function () {
+          $validateButton.prop("disabled", false);
+        });
+    });
 
     updateButtonPreview();
   });

@@ -72,15 +72,21 @@ final class ProductTryOnService extends AbstractService
         );
 
         wp_localize_script('dressme-front', 'dressmeTryOn', [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('dressme_try_on_request'),
             'buttonLabel' => $this->settingsRepository->getButtonLabel(),
             'isConfigured' => $this->settingsRepository->isConfigured(),
             'anonymousDailyQuota' => $this->settingsRepository->getAnonymousDailyQuota(),
             'buttonStyle' => $buttonStyle,
             'productPayload' => $this->productDataMapper->buildPayload($product),
             'messages' => [
-                'notConfigured' => __('DressMe is not configured yet. Add your API key in WooCommerce settings to continue.', 'dressme'),
-                'uploadPrompt' => __('Choose a photo or open your camera to prepare the future try-on flow.', 'dressme'),
+                'notConfigured' => __('DressMe is not configured yet. Add the API URL and key in WooCommerce settings to continue.', 'dressme'),
+                'uploadPrompt' => __('Photo selected. You can now send the try-on request.', 'dressme'),
                 'cameraUnavailable' => __('Camera access is not available in this browser yet. You can still upload a photo.', 'dressme'),
+                'missingPhoto' => __('Choose a customer photo before sending the try-on request.', 'dressme'),
+                'sending' => __('Sending the try-on request...', 'dressme'),
+                'received' => __('Try-on request received. Job ID: %s', 'dressme'),
+                'failed' => __('The try-on request failed.', 'dressme'),
             ],
         ]);
     }
@@ -184,7 +190,7 @@ final class ProductTryOnService extends AbstractService
                             ?>
                         </p>
                         <button type="button" class="button button-primary" data-dressme-generate disabled>
-                            <?php esc_html_e('Generate try-on later', 'dressme'); ?>
+                            <?php esc_html_e('Send try-on request', 'dressme'); ?>
                         </button>
                     </div>
                 </div>
@@ -192,8 +198,8 @@ final class ProductTryOnService extends AbstractService
                     <?php
                     echo esc_html(
                         $this->settingsRepository->isConfigured()
-                            ? __('DressMe is configured and ready for the Symfony connection phase.', 'dressme')
-                            : __('DressMe still needs the API key before live generation can be enabled.', 'dressme')
+                            ? __('DressMe is configured and ready to send requests to Symfony.', 'dressme')
+                            : __('DressMe still needs the API URL and key before live generation can be enabled.', 'dressme')
                     );
                     ?>
                 </div>
