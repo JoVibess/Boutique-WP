@@ -56,6 +56,8 @@ RUN cd wp-content/plugins/change-me-theme \
 
 RUN cd wp-content/themes/change-me/assets \
     && npm install \
-    && npm run build
+    && npm run build \
+    && rm -rf node_modules
 
-RUN chown -R www-data:www-data /var/www/wp-content
+RUN mkdir -p /var/www/wp-content/uploads /var/www/wp-content/upgrade \
+    && chown -R www-data:www-data /var/www/wp-content/uploads /var/www/wp-content/upgrade
