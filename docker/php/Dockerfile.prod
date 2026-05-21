@@ -45,5 +45,6 @@ WORKDIR /var/www
 COPY docker/php/php/php.ini /usr/local/etc/php/php.ini
 COPY docker/php/vhosts/prod.conf /etc/apache2/sites-available/000-default.conf
 COPY . .
+COPY wp-config-prod.php /var/www/wp-config.php
 
 RUN chown -R www-data:www-data /var/www/wp-content
