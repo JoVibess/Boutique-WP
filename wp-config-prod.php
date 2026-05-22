@@ -20,6 +20,13 @@ $table_prefix = getenv('WORDPRESS_TABLE_PREFIX') ?: 'wp_';
 
 define('WP_DEBUG', filter_var(getenv('WORDPRESS_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN));
 
+if (
+    isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+    && 'https' === strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO'])
+) {
+    $_SERVER['HTTPS'] = 'on';
+}
+
 if (getenv('WORDPRESS_HOME')) {
     define('WP_HOME', getenv('WORDPRESS_HOME'));
 }
