@@ -49,11 +49,6 @@ COPY docker/php/vhosts/prod.conf /etc/apache2/sites-available/000-default.conf
 COPY . .
 COPY wp-config-prod.php /var/www/wp-config.php
 
-RUN rm -rf wp-content/plugins/woocommerce \
-    && curl -L -o /tmp/woocommerce.zip https://downloads.wordpress.org/plugin/woocommerce.latest-stable.zip \
-    && unzip -q /tmp/woocommerce.zip -d wp-content/plugins \
-    && rm -f /tmp/woocommerce.zip
-
 RUN cd wp-content/plugins/change-me-theme \
     && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
     && cd /var/www/wp-content/plugins/dressme \

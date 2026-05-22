@@ -2,4 +2,5 @@
 .DS_Store
 tmp
 wp-content/cache
+wp-content/plugins/woocommerce
 wp-content/uploads/cache
