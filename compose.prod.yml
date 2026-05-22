@@ -25,7 +25,11 @@ services:
       WP_ENVIRONMENT_TYPE: production
     volumes:
       - wordpress-uploads:/var/www/wp-content/uploads
+      - wordpress-plugins:/var/www/wp-content/plugins
+      - wordpress-languages:/var/www/wp-content/languages
 
 volumes:
   wordpress-db-data:
   wordpress-uploads:
+  wordpress-plugins:
+  wordpress-languages:

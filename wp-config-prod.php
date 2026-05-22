@@ -19,6 +19,7 @@ define('NONCE_SALT', getenv('WORDPRESS_NONCE_SALT') ?: 'change-me-nonce-salt');
 $table_prefix = getenv('WORDPRESS_TABLE_PREFIX') ?: 'wp_';
 
 define('WP_DEBUG', filter_var(getenv('WORDPRESS_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN));
+define('FS_METHOD', 'direct');
 
 if (
     isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
