@@ -50,8 +50,6 @@ COPY . .
 COPY wp-config-prod.php /var/www/wp-config.php
 
 RUN cd wp-content/plugins/change-me-theme \
-    && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
-    && cd /var/www/wp-content/plugins/dressme \
     && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 RUN cd wp-content/themes/change-me/assets \
