@@ -112,6 +112,70 @@
     return String(template || "").replace("%s", value);
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function hydrateProductPreview(modal) {
+    const product = config.productPayload || {};
+    const resultMedia = modal.querySelector("[data-dressme-result-media]");
+    const title = modal.querySelector("[data-dressme-product-title]");
+    const description = modal.querySelector("[data-dressme-product-description]");
+
+    if (title) {
+      title.textContent = product.product_title || "";
+    }
+
+    if (description) {
+      description.textContent = product.product_description || "";
+    }
+
+    if (!resultMedia) {
+      return;
+    }
+
+    if (product.product_image_url) {
+      resultMedia.innerHTML = `<img src="${escapeHtml(product.product_image_url)}" alt="${escapeHtml(
+        product.product_title || "DressMe product preview"
+      )}">`;
+      return;
+    }
+
+    resultMedia.innerHTML = "<span>Product preview unavailable.</span>";
+  }
+
+  function getNotConfiguredMessage() {
+    const missingFields = config.missingConfigurationFields || [];
+
+    if (missingFields.length === 0) {
+      return config.messages.notConfigured;
+    }
+
+    if (missingFields.length === 1 && missingFields[0] === "api_url") {
+      return "DressMe is missing the API URL in WooCommerce settings.";
+    }
+
+    if (missingFields.length === 1 && missingFields[0] === "api_key") {
+      return "DressMe is missing the API key in WooCommerce settings.";
+    }
+
+    return "DressMe is missing both the API URL and the API key in WooCommerce settings.";
+  }
+
+  function resetPreview(preview, removePhotoButton) {
+    preview.innerHTML = "<span>No photo selected yet.</span>";
+
+    if (removePhotoButton) {
+      preview.appendChild(removePhotoButton);
+      removePhotoButton.hidden = true;
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const modal = document.querySelector("[data-dressme-modal]");
     const openButton = document.querySelector("[data-dressme-open-modal]");
@@ -130,12 +194,16 @@
     const fileInput = modal.querySelector("[data-dressme-file-input]");
     const generateButton = modal.querySelector("[data-dressme-generate]");
     const cameraStatus = modal.querySelector("[data-dressme-camera-status]");
+    const resultCaption = modal.querySelector("[data-dressme-result-caption]");
+    const removePhotoButton = modal.querySelector("[data-dressme-remove-photo]");
+
+    hydrateProductPreview(modal);
 
     openButton.addEventListener("click", function () {
       openModal(modal);
 
       if (!config.isConfigured) {
-        updateFeedback(modal, config.messages.notConfigured);
+        updateFeedback(modal, getNotConfiguredMessage());
       } else {
         updateFeedback(
           modal,
@@ -177,6 +245,11 @@
         selectedCustomerImage = String(reader.result || "");
         preview.innerHTML = `<img src="${selectedCustomerImage}" alt="DressMe preview">`;
 
+        if (removePhotoButton) {
+          preview.appendChild(removePhotoButton);
+          removePhotoButton.hidden = false;
+        }
+
         if (config.isConfigured) {
           generateButton.removeAttribute("disabled");
         }
@@ -187,9 +260,17 @@
       reader.readAsDataURL(file);
     });
 
+    removePhotoButton?.addEventListener("click", function () {
+      selectedCustomerImage = "";
+      fileInput.value = "";
+      resetPreview(preview, removePhotoButton);
+      generateButton.setAttribute("disabled", "disabled");
+      feedback.textContent = config.messages.missingPhoto;
+    });
+
     generateButton?.addEventListener("click", async function () {
       if (!config.isConfigured) {
-        updateFeedback(modal, config.messages.notConfigured);
+        updateFeedback(modal, getNotConfiguredMessage());
         return;
       }
 
@@ -215,6 +296,11 @@
 
         if (!response.ok || !payload.success) {
           throw new Error(data.message || config.messages.failed);
+        }
+
+        if (resultCaption) {
+          resultCaption.textContent =
+            "Try-on request sent. This product preview will be replaced by the generated look as soon as it is available.";
         }
 
         updateFeedback(modal, formatMessage(config.messages.received, data.job_id || ""));

@@ -25,6 +25,24 @@ final class SettingsRepository
         return '' !== $this->getApiKey() && '' !== $this->getApiBaseUrl();
     }
 
+    /**
+     * @return string[]
+     */
+    public function getMissingConfigurationFields(): array
+    {
+        $missing = [];
+
+        if ('' === $this->getApiBaseUrl()) {
+            $missing[] = 'api_url';
+        }
+
+        if ('' === $this->getApiKey()) {
+            $missing[] = 'api_key';
+        }
+
+        return $missing;
+    }
+
     public function getApiKey(): string
     {
         return trim((string) $this->get(Options::API_KEY));

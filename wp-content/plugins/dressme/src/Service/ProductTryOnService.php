@@ -35,7 +35,8 @@ final class ProductTryOnService extends AbstractService
             return;
         }
 
-        global $product;
+        $productId = get_queried_object_id();
+        $product = wc_get_product($productId);
 
         if (!$product instanceof \WC_Product || !$this->eligibilityResolver->isEligible($product->get_id())) {
             return;
@@ -76,6 +77,7 @@ final class ProductTryOnService extends AbstractService
             'nonce' => wp_create_nonce('dressme_try_on_request'),
             'buttonLabel' => $this->settingsRepository->getButtonLabel(),
             'isConfigured' => $this->settingsRepository->isConfigured(),
+            'missingConfigurationFields' => $this->settingsRepository->getMissingConfigurationFields(),
             'anonymousDailyQuota' => $this->settingsRepository->getAnonymousDailyQuota(),
             'buttonStyle' => $buttonStyle,
             'productPayload' => $this->productDataMapper->buildPayload($product),
@@ -171,16 +173,21 @@ final class ProductTryOnService extends AbstractService
                         </div>
                         <div class="dressme-modal__preview" data-dressme-preview>
                             <span><?php esc_html_e('No photo selected yet.', 'dressme'); ?></span>
+                            <button type="button" class="dressme-modal__preview-remove" aria-label="<?php echo esc_attr__('Remove selected photo', 'dressme'); ?>" data-dressme-remove-photo hidden>&times;</button>
                         </div>
                     </div>
                     <div class="dressme-modal__panel">
-                        <h4><?php esc_html_e('Try-on request payload', 'dressme'); ?></h4>
-                        <ul class="dressme-modal__payload">
-                            <li><?php esc_html_e('DressMe API key', 'dressme'); ?></li>
-                            <li><?php esc_html_e('Anonymous visitor ID', 'dressme'); ?></li>
-                            <li><?php esc_html_e('Mapped product title, description, and image', 'dressme'); ?></li>
-                            <li><?php esc_html_e('Daily anonymous quota set by the merchant', 'dressme'); ?></li>
-                        </ul>
+                        <h4><?php esc_html_e('Selected product', 'dressme'); ?></h4>
+                        <p class="dressme-modal__result-caption" data-dressme-result-caption>
+                            <?php esc_html_e('The generated try-on will appear here after the request is sent.', 'dressme'); ?>
+                        </p>
+                        <div class="dressme-modal__result-media" data-dressme-result-media>
+                            <span><?php esc_html_e('Product preview unavailable.', 'dressme'); ?></span>
+                        </div>
+                        <div class="dressme-modal__product-copy">
+                            <h5 class="dressme-modal__product-title" data-dressme-product-title></h5>
+                            <p class="dressme-modal__product-description" data-dressme-product-description></p>
+                        </div>
                         <p class="dressme-modal__quota">
                             <?php
                             printf(
@@ -199,12 +206,31 @@ final class ProductTryOnService extends AbstractService
                     echo esc_html(
                         $this->settingsRepository->isConfigured()
                             ? __('DressMe is configured and ready to send requests to Symfony.', 'dressme')
-                            : __('DressMe still needs the API URL and key before live generation can be enabled.', 'dressme')
+                            : $this->buildMissingConfigurationMessage()
                     );
                     ?>
                 </div>
             </div>
         </div>
         <?php
+    }
+
+    private function buildMissingConfigurationMessage(): string
+    {
+        $missingFields = $this->settingsRepository->getMissingConfigurationFields();
+
+        if ([] === $missingFields) {
+            return __('DressMe still needs the API URL and key before live generation can be enabled.', 'dressme');
+        }
+
+        if (['api_url'] === $missingFields) {
+            return __('DressMe still needs the API URL in WooCommerce settings before live generation can be enabled.', 'dressme');
+        }
+
+        if (['api_key'] === $missingFields) {
+            return __('DressMe still needs the API key in WooCommerce settings before live generation can be enabled.', 'dressme');
+        }
+
+        return __('DressMe still needs the API URL and key in WooCommerce settings before live generation can be enabled.', 'dressme');
     }
 }

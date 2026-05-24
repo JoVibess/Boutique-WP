@@ -41,6 +41,10 @@ button.dressme-tryon-button:focus {
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
 
 .dressme-modal__backdrop {
@@ -52,10 +56,10 @@ button.dressme-tryon-button:focus {
 .dressme-modal__dialog {
   position: relative;
   z-index: 1;
-  width: min(960px, calc(100vw - 32px));
+  width: min(960px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);
   overflow: auto;
-  margin: 24px auto;
+  margin: 0;
   padding: 28px;
   border-radius: 20px;
   background: #ffffff;
@@ -113,6 +117,7 @@ button.dressme-tryon-button:focus {
 }
 
 .dressme-modal__preview {
+  position: relative;
   min-height: 220px;
   display: flex;
   align-items: center;
@@ -131,11 +136,64 @@ button.dressme-tryon-button:focus {
   object-fit: contain;
 }
 
-.dressme-modal__payload {
-  padding-left: 18px;
+.dressme-modal__preview-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(17, 17, 17, 0.88);
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(12, 18, 32, 0.2);
+}
+
+.dressme-modal__result-caption {
+  margin: 0 0 16px;
+  color: #617685;
+}
+
+.dressme-modal__result-media {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #d9e1e8;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.dressme-modal__result-media img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+}
+
+.dressme-modal__product-copy {
+  margin-top: 16px;
+}
+
+.dressme-modal__product-title {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.dressme-modal__product-description {
+  margin: 0;
+  color: #4a6070;
 }
 
 .dressme-modal__quota {
+  margin-top: 16px;
   font-weight: 600;
 }
 
@@ -148,9 +206,14 @@ button.dressme-tryon-button:focus {
 }
 
 @media (max-width: 767px) {
+  .dressme-modal {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
   .dressme-modal__dialog {
     width: calc(100vw - 20px);
-    margin: 10px auto;
+    margin: 0;
     padding: 18px;
   }
 
