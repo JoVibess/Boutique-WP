@@ -3,7 +3,8 @@ FROM php:8.2-apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-        default-mysql-client \
+        curl \
+        g++ \
         git \
         libfreetype6-dev \
         libicu-dev \
@@ -16,6 +17,7 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
         locales \
         nodejs \
         npm \
+        rsync \
         unzip \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -63,3 +65,12 @@ RUN mkdir -p /var/www/wp-content/uploads /var/www/wp-content/upgrade \
         /var/www/wp-content/upgrade \
         /var/www/wp-content/plugins \
         /var/www/wp-content/plugins/change-me-theme/config
+
+RUN mkdir -p /usr/src/wordpress-plugins \
+    && cp -a /var/www/wp-content/plugins/. /usr/src/wordpress-plugins/
+
+COPY docker/php/entrypoint.sh /usr/local/bin/dressme-entrypoint.sh
+RUN chmod +x /usr/local/bin/dressme-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/dressme-entrypoint.sh"]
+CMD ["apache2-foreground"]

@@ -23,6 +23,8 @@ final class WordPressApiBridgeService extends AbstractService
         add_action('wp_ajax_dressme_validate_key', [$this, 'validateKey']);
         add_action('wp_ajax_dressme_try_on_request', [$this, 'requestTryOn']);
         add_action('wp_ajax_nopriv_dressme_try_on_request', [$this, 'requestTryOn']);
+        add_action('wp_ajax_dressme_try_on_status', [$this, 'requestTryOnStatus']);
+        add_action('wp_ajax_nopriv_dressme_try_on_status', [$this, 'requestTryOnStatus']);
     }
 
     public function validateKey(): void
@@ -78,6 +80,28 @@ final class WordPressApiBridgeService extends AbstractService
         ];
 
         $response = $this->apiClient->post('/api/wordpress/try-on/request', $payload);
+
+        $this->sendProxyResponse($response);
+    }
+
+    public function requestTryOnStatus(): void
+    {
+        check_ajax_referer('dressme_try_on_status', 'nonce');
+
+        if (!$this->settingsRepository->isConfigured()) {
+            wp_send_json_error([
+                'error_code' => 'NOT_CONFIGURED',
+                'message' => __('DressMe API URL and key must be configured before checking a try-on status.', 'dressme'),
+            ], 400);
+        }
+
+        $payload = [
+            'api_key' => $this->settingsRepository->getApiKey(),
+            'site_url' => home_url(),
+            'job_id' => sanitize_text_field(wp_unslash((string) ($_POST['job_id'] ?? ''))),
+        ];
+
+        $response = $this->apiClient->post('/api/wordpress/try-on/status', $payload);
 
         $this->sendProxyResponse($response);
     }

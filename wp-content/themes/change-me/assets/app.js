@@ -42,8 +42,6 @@ require("./app.scss");
 $(document).ready(function($){
     //init animations AOS
     //AOS.init();
-
-    console.log("%cCreated by Genesii and Gardeners, with ❤", "color: #9ed6a8; padding: 5px 0px 1px; border-bottom:2px solid #9ed6a8;");
 });
 
 /*----------------------------*/

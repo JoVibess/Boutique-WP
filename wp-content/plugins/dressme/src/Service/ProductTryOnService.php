@@ -12,6 +12,7 @@ final class ProductTryOnService extends AbstractService
     private ProductEligibilityResolver $eligibilityResolver;
     private SettingsRepository $settingsRepository;
     private ProductDataMapper $productDataMapper;
+    private bool $assetsPrinted = false;
 
     public function __construct(string $path)
     {
@@ -35,10 +36,42 @@ final class ProductTryOnService extends AbstractService
             return;
         }
 
-        $productId = get_queried_object_id();
-        $product = wc_get_product($productId);
+        $product = $this->resolveCurrentProduct();
 
         if (!$product instanceof \WC_Product || !$this->eligibilityResolver->isEligible($product->get_id())) {
+            return;
+        }
+
+        $this->enqueueAssetsForProduct($product);
+    }
+
+    public function renderButton(): void
+    {
+        $product = $this->resolveCurrentProduct();
+
+        if (!$product instanceof \WC_Product || !$this->eligibilityResolver->isEligible($product->get_id())) {
+            return;
+        }
+
+        $this->enqueueAssetsForProduct($product);
+
+        $buttonStyle = $this->settingsRepository->getButtonStyleConfig();
+        $inlineStyle = $this->buildInlineButtonStyle($buttonStyle);
+
+        printf(
+            '<div class="dressme-button-slot"><button type="button" class="dressme-tryon-button" style="%1$s" data-dressme-open-modal="1" data-dressme-bg="%2$s" data-dressme-color="%3$s" data-dressme-hover-bg="%4$s" data-dressme-hover-color="%5$s">%6$s</button></div>',
+            $inlineStyle,
+            esc_attr($buttonStyle['bgColor']),
+            esc_attr($buttonStyle['textColor']),
+            esc_attr($buttonStyle['hoverBgColor']),
+            esc_attr($buttonStyle['hoverTextColor']),
+            esc_html($this->settingsRepository->getButtonLabel())
+        );
+    }
+
+    private function enqueueAssetsForProduct(\WC_Product $product): void
+    {
+        if (wp_style_is('dressme-front', 'enqueued') && wp_script_is('dressme-front', 'enqueued')) {
             return;
         }
 
@@ -46,7 +79,7 @@ final class ProductTryOnService extends AbstractService
             'dressme-front',
             plugins_url('assets/css/front.css', dirname(__DIR__, 2) . '/dressme.php'),
             [],
-            '0.1.0'
+            '0.1.7'
         );
 
         $buttonStyle = $this->settingsRepository->getButtonStyleConfig();
@@ -68,13 +101,14 @@ final class ProductTryOnService extends AbstractService
             'dressme-front',
             plugins_url('assets/js/front.js', dirname(__DIR__, 2) . '/dressme.php'),
             [],
-            '0.1.0',
+            '0.1.7',
             true
         );
 
         wp_localize_script('dressme-front', 'dressmeTryOn', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('dressme_try_on_request'),
+            'statusNonce' => wp_create_nonce('dressme_try_on_status'),
             'buttonLabel' => $this->settingsRepository->getButtonLabel(),
             'isConfigured' => $this->settingsRepository->isConfigured(),
             'missingConfigurationFields' => $this->settingsRepository->getMissingConfigurationFields(),
@@ -82,37 +116,38 @@ final class ProductTryOnService extends AbstractService
             'buttonStyle' => $buttonStyle,
             'productPayload' => $this->productDataMapper->buildPayload($product),
             'messages' => [
-                'notConfigured' => __('DressMe is not configured yet. Add the API URL and key in WooCommerce settings to continue.', 'dressme'),
-                'uploadPrompt' => __('Photo selected. You can now send the try-on request.', 'dressme'),
-                'cameraUnavailable' => __('Camera access is not available in this browser yet. You can still upload a photo.', 'dressme'),
-                'missingPhoto' => __('Choose a customer photo before sending the try-on request.', 'dressme'),
-                'sending' => __('Sending the try-on request...', 'dressme'),
-                'received' => __('Try-on request received. Job ID: %s', 'dressme'),
-                'failed' => __('The try-on request failed.', 'dressme'),
+                'notConfigured' => __('This try-on is not ready yet. Please check your DressMe settings.', 'dressme'),
+                'uploadPrompt' => __('Photo added. You can generate your preview now.', 'dressme'),
+                'cameraUnavailable' => __('Camera access is not available on this device yet. You can still upload a photo.', 'dressme'),
+                'missingPhoto' => __('Add your photo before generating your preview.', 'dressme'),
+                'sending' => __('Generating your preview...', 'dressme'),
+                'received' => __('Request received. Job ID: %s', 'dressme'),
+                'failed' => __('We could not generate your preview right now.', 'dressme'),
+                'processing' => __('Your preview is being generated. It will appear here automatically.', 'dressme'),
+                'completed' => __('Your preview is ready.', 'dressme'),
+                'statusFailed' => __('We could not refresh your preview right now.', 'dressme'),
+                'download' => __('Download image', 'dressme'),
+                'compressing' => __('Optimizing your photo before generation...', 'dressme'),
+                'previewDefault' => __('Your generated preview will appear here.', 'dressme'),
             ],
         ]);
     }
 
-    public function renderButton(): void
+    private function printEnqueuedAssets(): void
     {
-        global $product;
-
-        if (!$product instanceof \WC_Product || !$this->eligibilityResolver->isEligible($product->get_id())) {
+        if ($this->assetsPrinted) {
             return;
         }
 
-        $buttonStyle = $this->settingsRepository->getButtonStyleConfig();
-        $inlineStyle = $this->buildInlineButtonStyle($buttonStyle);
+        if (wp_style_is('dressme-front', 'enqueued')) {
+            wp_print_styles(['dressme-front']);
+        }
 
-        printf(
-            '<div class="dressme-button-slot"><button type="button" class="dressme-tryon-button" style="%1$s" data-dressme-open-modal="1" data-dressme-bg="%2$s" data-dressme-color="%3$s" data-dressme-hover-bg="%4$s" data-dressme-hover-color="%5$s">%6$s</button></div>',
-            $inlineStyle,
-            esc_attr($buttonStyle['bgColor']),
-            esc_attr($buttonStyle['textColor']),
-            esc_attr($buttonStyle['hoverBgColor']),
-            esc_attr($buttonStyle['hoverTextColor']),
-            esc_html($this->settingsRepository->getButtonLabel())
-        );
+        if (wp_script_is('dressme-front', 'enqueued')) {
+            wp_print_scripts(['dressme-front']);
+        }
+
+        $this->assetsPrinted = true;
     }
 
     /**
@@ -144,11 +179,14 @@ final class ProductTryOnService extends AbstractService
             return;
         }
 
-        global $product;
+        $product = $this->resolveCurrentProduct();
 
         if (!$product instanceof \WC_Product || !$this->eligibilityResolver->isEligible($product->get_id())) {
             return;
         }
+
+        $this->enqueueAssetsForProduct($product);
+        $this->printEnqueuedAssets();
 
         ?>
         <div class="dressme-modal" data-dressme-modal hidden>
@@ -156,30 +194,41 @@ final class ProductTryOnService extends AbstractService
             <div class="dressme-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="dressme-modal-title">
                 <button type="button" class="dressme-modal__close" aria-label="<?php echo esc_attr__('Close DressMe modal', 'dressme'); ?>" data-dressme-close-modal>&times;</button>
                 <div class="dressme-modal__header">
-                    <p class="dressme-modal__eyebrow"><?php esc_html_e('DressMe', 'dressme'); ?></p>
-                    <h3 id="dressme-modal-title"><?php esc_html_e('Prepare the virtual try-on experience', 'dressme'); ?></h3>
-                    <p><?php esc_html_e('This first version prepares the future flow: photo capture, product payload, quota handling, and Symfony API connection.', 'dressme'); ?></p>
+                    <h3 id="dressme-modal-title"><?php esc_html_e('Try it on', 'dressme'); ?></h3>
+                    <p><?php esc_html_e('Add your photo, then generate a preview with this product.', 'dressme'); ?></p>
+                    <p class="dressme-modal__quota dressme-modal__quota--header">
+                        <?php
+                        printf(
+                            esc_html__('You have %d generations left today.', 'dressme'),
+                            $this->settingsRepository->getAnonymousDailyQuota()
+                        );
+                        ?>
+                    </p>
                 </div>
                 <div class="dressme-modal__grid">
                     <div class="dressme-modal__panel">
-                        <h4><?php esc_html_e('Customer photo', 'dressme'); ?></h4>
-                        <p data-dressme-camera-status><?php esc_html_e('Choose a source for your photo.', 'dressme'); ?></p>
+                        <h4><?php esc_html_e('Your photo', 'dressme'); ?></h4>
+                        <p data-dressme-camera-status><?php esc_html_e('Choose a photo from your camera or your device.', 'dressme'); ?></p>
                         <div class="dressme-modal__actions">
-                            <button type="button" class="button" data-dressme-open-camera><?php esc_html_e('Open camera', 'dressme'); ?></button>
-                            <label class="button dressme-modal__upload">
+                            <button type="button" class="dressme-modal__action-button" data-dressme-open-camera>
+                                <span class="dressme-modal__action-icon" aria-hidden="true">📷</span>
+                                <span><?php esc_html_e('Open camera', 'dressme'); ?></span>
+                            </button>
+                            <label class="dressme-modal__action-button dressme-modal__upload">
+                                <span class="dressme-modal__action-icon" aria-hidden="true">↥</span>
                                 <span><?php esc_html_e('Upload photo', 'dressme'); ?></span>
                                 <input type="file" accept="image/*" data-dressme-file-input hidden>
                             </label>
                         </div>
                         <div class="dressme-modal__preview" data-dressme-preview>
-                            <span><?php esc_html_e('No photo selected yet.', 'dressme'); ?></span>
+                            <span><?php esc_html_e('Your photo will appear here.', 'dressme'); ?></span>
                             <button type="button" class="dressme-modal__preview-remove" aria-label="<?php echo esc_attr__('Remove selected photo', 'dressme'); ?>" data-dressme-remove-photo hidden>&times;</button>
                         </div>
                     </div>
                     <div class="dressme-modal__panel">
-                        <h4><?php esc_html_e('Selected product', 'dressme'); ?></h4>
+                        <h4><?php esc_html_e('Product preview', 'dressme'); ?></h4>
                         <p class="dressme-modal__result-caption" data-dressme-result-caption>
-                            <?php esc_html_e('The generated try-on will appear here after the request is sent.', 'dressme'); ?>
+                            <?php esc_html_e('Your generated preview will appear here.', 'dressme'); ?>
                         </p>
                         <div class="dressme-modal__result-media" data-dressme-result-media>
                             <span><?php esc_html_e('Product preview unavailable.', 'dressme'); ?></span>
@@ -188,27 +237,32 @@ final class ProductTryOnService extends AbstractService
                             <h5 class="dressme-modal__product-title" data-dressme-product-title></h5>
                             <p class="dressme-modal__product-description" data-dressme-product-description></p>
                         </div>
-                        <p class="dressme-modal__quota">
-                            <?php
-                            printf(
-                                esc_html__('Current anonymous daily quota: %d generations.', 'dressme'),
-                                $this->settingsRepository->getAnonymousDailyQuota()
-                            );
-                            ?>
-                        </p>
-                        <button type="button" class="button button-primary" data-dressme-generate disabled>
-                            <?php esc_html_e('Send try-on request', 'dressme'); ?>
+                        <button type="button" class="dressme-modal__generate-button" data-dressme-generate data-dressme-disabled-hint="<?php echo esc_attr__('Add your photo to generate your preview.', 'dressme'); ?>" disabled>
+                            <?php esc_html_e('Generate my look', 'dressme'); ?>
                         </button>
                     </div>
                 </div>
-                <div class="dressme-modal__footer" data-dressme-feedback>
-                    <?php
-                    echo esc_html(
-                        $this->settingsRepository->isConfigured()
-                            ? __('DressMe is configured and ready to send requests to Symfony.', 'dressme')
-                            : $this->buildMissingConfigurationMessage()
-                    );
-                    ?>
+                <div class="dressme-modal__generated-stage" data-dressme-generated-stage hidden>
+                    <div class="dressme-modal__generated-header">
+                        <div>
+                            <h4><?php esc_html_e('Generated preview', 'dressme'); ?></h4>
+                            <p data-dressme-generated-caption><?php esc_html_e('Your generated preview will appear here.', 'dressme'); ?></p>
+                        </div>
+                        <a class="dressme-modal__download-button" href="#" data-dressme-download hidden download>
+                            <?php esc_html_e('Download image', 'dressme'); ?>
+                        </a>
+                    </div>
+                    <div class="dressme-modal__generated-media" data-dressme-generated-media>
+                        <span><?php esc_html_e('Your generated preview will appear here.', 'dressme'); ?></span>
+                    </div>
+                </div>
+                <div class="dressme-modal__footer">
+                    <div class="dressme-modal__feedback-wrap">
+                        <p class="dressme-modal__feedback" data-dressme-feedback>
+                            <?php esc_html_e('Add your photo to generate your preview.', 'dressme'); ?>
+                        </p>
+                        <p class="dressme-modal__powered"><?php esc_html_e('Powered by DressMe', 'dressme'); ?></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -232,5 +286,36 @@ final class ProductTryOnService extends AbstractService
         }
 
         return __('DressMe still needs the API URL and key in WooCommerce settings before live generation can be enabled.', 'dressme');
+    }
+
+    private function resolveCurrentProduct(): ?\WC_Product
+    {
+        global $product;
+
+        if ($product instanceof \WC_Product) {
+            return $product;
+        }
+
+        $productId = get_queried_object_id();
+
+        if ($productId > 0) {
+            $resolvedProduct = wc_get_product($productId);
+
+            if ($resolvedProduct instanceof \WC_Product) {
+                return $resolvedProduct;
+            }
+        }
+
+        $postId = get_the_ID();
+
+        if (is_numeric($postId) && (int) $postId > 0) {
+            $resolvedProduct = wc_get_product((int) $postId);
+
+            if ($resolvedProduct instanceof \WC_Product) {
+                return $resolvedProduct;
+            }
+        }
+
+        return null;
     }
 }

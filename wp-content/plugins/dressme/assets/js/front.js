@@ -108,6 +108,16 @@
     return body;
   }
 
+  function buildTryOnStatusBody(jobId) {
+    const body = new URLSearchParams();
+
+    body.set("action", "dressme_try_on_status");
+    body.set("nonce", config.statusNonce || "");
+    body.set("job_id", jobId);
+
+    return body;
+  }
+
   function formatMessage(template, value) {
     return String(template || "").replace("%s", value);
   }
@@ -168,11 +178,36 @@
   }
 
   function resetPreview(preview, removePhotoButton) {
-    preview.innerHTML = "<span>No photo selected yet.</span>";
+    preview.innerHTML = "<span>Your photo will appear here.</span>";
 
     if (removePhotoButton) {
       preview.appendChild(removePhotoButton);
       removePhotoButton.hidden = true;
+    }
+  }
+
+  function clearGeneratedResult(modal) {
+    const generatedStage = modal.querySelector("[data-dressme-generated-stage]");
+    const generatedMedia = modal.querySelector("[data-dressme-generated-media]");
+    const generatedCaption = modal.querySelector("[data-dressme-generated-caption]");
+    const downloadLink = modal.querySelector("[data-dressme-download]");
+
+    if (generatedStage) {
+      generatedStage.hidden = true;
+    }
+
+    if (generatedMedia) {
+      generatedMedia.innerHTML = "<span>Your generated preview will appear here.</span>";
+    }
+
+    if (generatedCaption) {
+      generatedCaption.textContent = (config.messages && config.messages.previewDefault) || "Your generated preview will appear here.";
+    }
+
+    if (downloadLink) {
+      downloadLink.hidden = true;
+      downloadLink.setAttribute("href", "#");
+      downloadLink.removeAttribute("download");
     }
   }
 
@@ -196,24 +231,179 @@
     const cameraStatus = modal.querySelector("[data-dressme-camera-status]");
     const resultCaption = modal.querySelector("[data-dressme-result-caption]");
     const removePhotoButton = modal.querySelector("[data-dressme-remove-photo]");
+    let statusPollTimer = null;
+    let activeJobId = "";
+    let pollRequestInFlight = false;
 
     hydrateProductPreview(modal);
 
-    openButton.addEventListener("click", function () {
-      openModal(modal);
+    function stopStatusPolling() {
+      if (statusPollTimer) {
+        window.clearTimeout(statusPollTimer);
+        statusPollTimer = null;
+      }
 
-      if (!config.isConfigured) {
-        updateFeedback(modal, getNotConfiguredMessage());
-      } else {
+      activeJobId = "";
+      pollRequestInFlight = false;
+    }
+
+    function scheduleNextStatusPoll(jobId, delay = 2500) {
+      stopStatusPolling();
+      activeJobId = jobId;
+      statusPollTimer = window.setTimeout(function () {
+        refreshTryOnStatus(jobId).catch(function (error) {
+          stopStatusPolling();
+          updateFeedback(modal, error.message || config.messages.statusFailed);
+
+          if (selectedCustomerImage) {
+            generateButton.removeAttribute("disabled");
+          }
+        });
+      }, delay);
+    }
+
+    function resetModalState() {
+      stopStatusPolling();
+      selectedCustomerImage = "";
+
+      if (fileInput) {
+        fileInput.value = "";
+      }
+
+      resetPreview(preview, removePhotoButton);
+      clearGeneratedResult(modal);
+      hydrateProductPreview(modal);
+
+      if (resultCaption) {
+        resultCaption.textContent = config.messages.previewDefault || "Your generated preview will appear here.";
+      }
+
+      if (cameraStatus) {
+        cameraStatus.textContent = "Choose a photo from your camera or your device.";
+      }
+
+      if (config.isConfigured) {
+        generateButton.setAttribute("disabled", "disabled");
         updateFeedback(
           modal,
           `Configuration prête. Quota anonyme actuel: ${config.anonymousDailyQuota} génération(s) par jour.`
         );
+      } else {
+        generateButton.setAttribute("disabled", "disabled");
+        updateFeedback(modal, getNotConfiguredMessage());
       }
+    }
+
+    async function compressImageFile(file, maxDimension = 1024, quality = 0.82) {
+      const dataUrl = await new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+
+        reader.onload = function () {
+          resolve(String(reader.result || ""));
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const image = await new Promise(function (resolve, reject) {
+        const img = new Image();
+
+        img.onload = function () {
+          resolve(img);
+        };
+
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+
+      const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+      const targetWidth = Math.max(1, Math.round(image.width * scale));
+      const targetHeight = Math.max(1, Math.round(image.height * scale));
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        return dataUrl;
+      }
+
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+      return canvas.toDataURL("image/jpeg", quality);
+    }
+
+    async function refreshTryOnStatus(jobId) {
+      if (pollRequestInFlight) {
+        return;
+      }
+
+      let response;
+      let payload;
+      let data;
+
+      pollRequestInFlight = true;
+
+      try {
+        response = await fetch(config.ajaxUrl, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          },
+          body: buildTryOnStatusBody(jobId),
+        });
+        payload = await response.json();
+        data = payload && payload.data ? payload.data : {};
+      } finally {
+        pollRequestInFlight = false;
+      }
+
+      if (activeJobId !== jobId) {
+        return;
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(data.message || config.messages.statusFailed);
+      }
+
+      if (data.status === "completed" && data.generated_image_url) {
+        stopStatusPolling();
+        setResultImage(modal, data.generated_image_url, config.messages.completed);
+        updateFeedback(modal, config.messages.completed);
+
+        if (selectedCustomerImage) {
+          generateButton.removeAttribute("disabled");
+        }
+
+        return;
+      }
+
+      if (data.status === "failed" || data.status === "rejected") {
+        stopStatusPolling();
+        updateFeedback(modal, data.error_message || config.messages.failed);
+
+        if (selectedCustomerImage) {
+          generateButton.removeAttribute("disabled");
+        }
+
+        return;
+      }
+
+      if (data.status === "processing" || data.status === "received") {
+        scheduleNextStatusPoll(jobId);
+      }
+    }
+
+    openButton.addEventListener("click", function () {
+      resetModalState();
+      openModal(modal);
     });
 
     modal.querySelectorAll("[data-dressme-close-modal]").forEach(function (element) {
       element.addEventListener("click", function () {
+        resetModalState();
         closeModal(modal);
       });
     });
@@ -226,7 +416,7 @@
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        cameraStatus.textContent = "Camera ready. Real capture flow will be connected in the next phase.";
+        cameraStatus.textContent = "Camera ready. Capture will be available here soon.";
         stream.getTracks().forEach((track) => track.stop());
       } catch (error) {
         cameraStatus.textContent = "Camera access was denied. You can still upload a photo.";
@@ -240,30 +430,37 @@
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function () {
-        selectedCustomerImage = String(reader.result || "");
-        preview.innerHTML = `<img src="${selectedCustomerImage}" alt="DressMe preview">`;
+      updateFeedback(modal, config.messages.compressing || "Optimizing your photo before generation...");
 
-        if (removePhotoButton) {
-          preview.appendChild(removePhotoButton);
-          removePhotoButton.hidden = false;
-        }
+      compressImageFile(file)
+        .then(function (compressedImage) {
+          selectedCustomerImage = compressedImage;
+          clearGeneratedResult(modal);
+          stopStatusPolling();
+          preview.innerHTML = `<img src="${selectedCustomerImage}" alt="DressMe preview">`;
 
-        if (config.isConfigured) {
-          generateButton.removeAttribute("disabled");
-        }
+          if (removePhotoButton) {
+            preview.appendChild(removePhotoButton);
+            removePhotoButton.hidden = false;
+          }
 
-        feedback.textContent = config.messages.uploadPrompt;
-      };
+          if (config.isConfigured) {
+            generateButton.removeAttribute("disabled");
+          }
 
-      reader.readAsDataURL(file);
+          feedback.textContent = config.messages.uploadPrompt;
+        })
+        .catch(function () {
+          updateFeedback(modal, config.messages.failed);
+        });
     });
 
     removePhotoButton?.addEventListener("click", function () {
       selectedCustomerImage = "";
       fileInput.value = "";
       resetPreview(preview, removePhotoButton);
+      clearGeneratedResult(modal);
+      stopStatusPolling();
       generateButton.setAttribute("disabled", "disabled");
       feedback.textContent = config.messages.missingPhoto;
     });
@@ -299,15 +496,49 @@
         }
 
         if (resultCaption) {
-          resultCaption.textContent =
-            "Try-on request sent. This product preview will be replaced by the generated look as soon as it is available.";
+          resultCaption.textContent = config.messages.processing;
         }
 
         updateFeedback(modal, formatMessage(config.messages.received, data.job_id || ""));
+
+        if (data.job_id) {
+          activeJobId = data.job_id;
+          refreshTryOnStatus(data.job_id).catch(function () {
+            scheduleNextStatusPoll(data.job_id);
+          });
+        }
       } catch (error) {
         updateFeedback(modal, error.message || config.messages.failed);
         generateButton.removeAttribute("disabled");
       }
     });
   });
+
+  function setResultImage(modal, imageUrl, caption) {
+    const generatedStage = modal.querySelector("[data-dressme-generated-stage]");
+    const generatedMedia = modal.querySelector("[data-dressme-generated-media]");
+    const generatedCaption = modal.querySelector("[data-dressme-generated-caption]");
+    const downloadLink = modal.querySelector("[data-dressme-download]");
+    const product = config.productPayload || {};
+
+    if (generatedStage) {
+      generatedStage.hidden = false;
+    }
+
+    if (generatedMedia && imageUrl) {
+      generatedMedia.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(
+        product.product_title || "DressMe generated try-on"
+      )}">`;
+    }
+
+    if (generatedCaption && caption) {
+      generatedCaption.textContent = caption;
+    }
+
+    if (downloadLink && imageUrl) {
+      downloadLink.hidden = false;
+      downloadLink.setAttribute("href", imageUrl);
+      downloadLink.setAttribute("download", `${(product.product_title || "dressme-look").replace(/[^a-z0-9_-]+/gi, "-").toLowerCase()}.jpg`);
+    }
+  }
 })();

@@ -56,59 +56,127 @@ button.dressme-tryon-button:focus {
 .dressme-modal__dialog {
   position: relative;
   z-index: 1;
-  width: min(960px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
+  width: min(900px, calc(100vw - 56px));
+  max-height: calc(100vh - 64px);
   overflow: auto;
   margin: 0;
   padding: 28px;
-  border-radius: 20px;
+  border-radius: 24px;
   background: #ffffff;
-  box-shadow: 0 28px 80px rgba(12, 18, 32, 0.28);
+  box-shadow: 0 32px 90px rgba(12, 18, 32, 0.24);
 }
 
 .dressme-modal__close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  border: 0;
-  background: transparent;
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #dde5ec;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
   font-size: 28px;
   line-height: 1;
   cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.dressme-modal__eyebrow {
-  margin: 0 0 8px;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #5d7d8d;
+.dressme-modal__close:hover {
+  background: #f4f7fb;
+  transform: scale(1.03);
+}
+
+.dressme-modal__header {
+  max-width: 620px;
 }
 
 .dressme-modal__header h3 {
-  margin: 0 0 12px;
-  font-size: 28px;
+  margin: 0 0 8px;
+  font-size: 40px;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.dressme-modal__header p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #5e7382;
 }
 
 .dressme-modal__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
 .dressme-modal__panel {
-  padding: 20px;
+  padding: 22px;
   border: 1px solid #d9e1e8;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #fbfdff 0%, #f3f7fb 100%);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fcfdff 0%, #f4f8fb 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dressme-modal__panel h4 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.dressme-modal__panel > p {
+  margin: 0;
+  color: #647989;
+  line-height: 1.5;
 }
 
 .dressme-modal__actions {
   display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-top: 14px;
+}
+
+.dressme-modal__action-button {
+  min-width: 0;
+  flex: 1 1 0;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 16px;
+  padding: 0 18px;
+  border: 1px solid #d7e0e7;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #13202b;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dressme-modal__action-button:hover {
+  border-color: #bccad6;
+  background: #f8fbfd;
+  box-shadow: 0 12px 24px rgba(12, 18, 32, 0.08);
+  transform: translateY(-1px);
+}
+
+.dressme-modal__action-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #eef4f8;
+  color: #476579;
+  font-size: 15px;
+  flex: 0 0 24px;
 }
 
 .dressme-modal__upload {
@@ -118,15 +186,17 @@ button.dressme-tryon-button:focus {
 
 .dressme-modal__preview {
   position: relative;
-  min-height: 220px;
+  min-height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 16px;
-  border: 1px dashed #b9c7d3;
-  border-radius: 14px;
+  margin-top: 14px;
+  border: 1px dashed #b7c6d3;
+  border-radius: 18px;
   background: #ffffff;
   color: #617685;
+  padding: 14px;
+  text-align: center;
 }
 
 .dressme-modal__preview img {
@@ -134,6 +204,7 @@ button.dressme-tryon-button:focus {
   max-width: 100%;
   max-height: 280px;
   object-fit: contain;
+  border-radius: 14px;
 }
 
 .dressme-modal__preview-remove {
@@ -156,19 +227,21 @@ button.dressme-tryon-button:focus {
 }
 
 .dressme-modal__result-caption {
-  margin: 0 0 16px;
+  margin: 0 0 22px;
   color: #617685;
+  line-height: 1.5;
 }
 
 .dressme-modal__result-media {
-  min-height: 220px;
+  min-height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border: 1px solid #d9e1e8;
-  border-radius: 14px;
+  border-radius: 18px;
   background: #ffffff;
+  padding: 14px;
 }
 
 .dressme-modal__result-media img {
@@ -176,6 +249,7 @@ button.dressme-tryon-button:focus {
   width: 100%;
   max-height: 280px;
   object-fit: contain;
+  border-radius: 14px;
 }
 
 .dressme-modal__product-copy {
@@ -183,26 +257,178 @@ button.dressme-tryon-button:focus {
 }
 
 .dressme-modal__product-title {
-  margin: 0 0 8px;
-  font-size: 22px;
+  margin: 0 0 10px;
+  font-size: 26px;
+  letter-spacing: -0.04em;
 }
 
 .dressme-modal__product-description {
   margin: 0;
   color: #4a6070;
+  line-height: 1.5;
+  font-size: 15px;
 }
 
 .dressme-modal__quota {
-  margin-top: 16px;
+  margin-top: 12px;
   font-weight: 600;
+  font-size: 15px;
+  color: #173042;
+}
+
+.dressme-modal__quota--header {
+  margin-top: 10px;
+}
+
+.dressme-modal__generate-button {
+  position: relative;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #111111 0%, #243646 100%);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  box-shadow: 0 18px 36px rgba(17, 17, 17, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.dressme-modal__generate-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 40px rgba(17, 17, 17, 0.22);
+}
+
+.dressme-modal__generate-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.dressme-modal__generate-button::after {
+  content: attr(data-dressme-disabled-hint);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 12px);
+  transform: translateX(-50%);
+  min-width: 220px;
+  max-width: 280px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #d6e0e8;
+  background: #ffffff;
+  color: #243646;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 14px 28px rgba(12, 18, 32, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+}
+
+.dressme-modal__generate-button:disabled:hover::after,
+.dressme-modal__generate-button:disabled:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(2px);
+}
+
+.dressme-modal__feedback-wrap {
+  flex: 1 1 100%;
+}
+
+.dressme-modal__feedback {
+  margin: 0 0 10px;
+  color: #173042;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.dressme-modal__powered {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8aa0b0;
 }
 
 .dressme-modal__footer {
+  margin-top: 18px;
+}
+
+.dressme-modal__generated-stage {
   margin-top: 20px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #eef7f2;
-  color: #1d5232;
+  padding: 22px;
+  border: 1px solid #d9e1e8;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fcfdff 0%, #f4f8fb 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dressme-modal__generated-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dressme-modal__generated-header h4 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.dressme-modal__generated-header p {
+  margin: 0;
+  color: #617685;
+  line-height: 1.5;
+}
+
+.dressme-modal__generated-media {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #d9e1e8;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 18px;
+}
+
+.dressme-modal__generated-media img {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+.dressme-modal__download-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid #d7e0e7;
+  background: #ffffff;
+  color: #13202b;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dressme-modal__download-button:hover {
+  background: #f8fbfd;
+  text-decoration: none;
 }
 
 @media (max-width: 767px) {
@@ -217,7 +443,31 @@ button.dressme-tryon-button:focus {
     padding: 18px;
   }
 
+  .dressme-modal__header h3 {
+    font-size: 32px;
+  }
+
+  .dressme-modal__header p {
+    font-size: 16px;
+  }
+
   .dressme-modal__grid {
     grid-template-columns: 1fr;
+  }
+
+  .dressme-modal__actions {
+    flex-wrap: wrap;
+  }
+
+  .dressme-modal__footer {
+    align-items: stretch;
+  }
+
+  .dressme-modal__generated-header {
+    flex-direction: column;
+  }
+
+  .dressme-modal__generated-media {
+    min-height: 280px;
   }
 }
