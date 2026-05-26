@@ -79,7 +79,7 @@ final class ProductTryOnService extends AbstractService
             'dressme-front',
             plugins_url('assets/css/front.css', dirname(__DIR__, 2) . '/dressme.php'),
             [],
-            '0.1.7'
+            '0.2.2'
         );
 
         $buttonStyle = $this->settingsRepository->getButtonStyleConfig();
@@ -101,7 +101,7 @@ final class ProductTryOnService extends AbstractService
             'dressme-front',
             plugins_url('assets/js/front.js', dirname(__DIR__, 2) . '/dressme.php'),
             [],
-            '0.1.7',
+            '0.2.2',
             true
         );
 
@@ -109,6 +109,7 @@ final class ProductTryOnService extends AbstractService
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('dressme_try_on_request'),
             'statusNonce' => wp_create_nonce('dressme_try_on_status'),
+            'downloadNonce' => wp_create_nonce('dressme_download_image'),
             'buttonLabel' => $this->settingsRepository->getButtonLabel(),
             'isConfigured' => $this->settingsRepository->isConfigured(),
             'missingConfigurationFields' => $this->settingsRepository->getMissingConfigurationFields(),
@@ -128,7 +129,7 @@ final class ProductTryOnService extends AbstractService
                 'statusFailed' => __('We could not refresh your preview right now.', 'dressme'),
                 'download' => __('Download image', 'dressme'),
                 'compressing' => __('Optimizing your photo before generation...', 'dressme'),
-                'previewDefault' => __('Your generated preview will appear here.', 'dressme'),
+                'previewDefault' => __('Here is the item you have selected for the virtual try on', 'dressme'),
             ],
         ]);
     }
@@ -188,104 +189,127 @@ final class ProductTryOnService extends AbstractService
         $this->enqueueAssetsForProduct($product);
         $this->printEnqueuedAssets();
 
+        $logoUrl = plugins_url('assets/images/logo-dressme.png', dirname(__DIR__, 2) . '/dressme.php');
+        $closeIconUrl = plugins_url('assets/images/cross.svg', dirname(__DIR__, 2) . '/dressme.php');
+        $generateIconUrl = plugins_url('assets/images/ia.svg', dirname(__DIR__, 2) . '/dressme.php');
+        $cameraIconUrl = plugins_url('assets/images/camera.svg', dirname(__DIR__, 2) . '/dressme.php');
+        $uploadIconUrl = plugins_url('assets/images/upload.svg', dirname(__DIR__, 2) . '/dressme.php');
         ?>
         <div class="dressme-modal" data-dressme-modal hidden>
             <div class="dressme-modal__backdrop" data-dressme-close-modal></div>
-            <div class="dressme-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="dressme-modal-title">
-                <button type="button" class="dressme-modal__close" aria-label="<?php echo esc_attr__('Close DressMe modal', 'dressme'); ?>" data-dressme-close-modal>&times;</button>
-                <div class="dressme-modal__header">
-                    <h3 id="dressme-modal-title"><?php esc_html_e('Try it on', 'dressme'); ?></h3>
-                    <p><?php esc_html_e('Add your photo, then generate a preview with this product.', 'dressme'); ?></p>
-                    <p class="dressme-modal__quota dressme-modal__quota--header">
-                        <?php
-                        printf(
-                            esc_html__('You have %d generations left today.', 'dressme'),
-                            $this->settingsRepository->getAnonymousDailyQuota()
-                        );
-                        ?>
-                    </p>
-                </div>
-                <div class="dressme-modal__grid">
-                    <div class="dressme-modal__panel">
-                        <h4><?php esc_html_e('Your photo', 'dressme'); ?></h4>
-                        <p data-dressme-camera-status><?php esc_html_e('Choose a photo from your camera or your device.', 'dressme'); ?></p>
-                        <div class="dressme-modal__actions">
-                            <button type="button" class="dressme-modal__action-button" data-dressme-open-camera>
-                                <span class="dressme-modal__action-icon" aria-hidden="true">📷</span>
-                                <span><?php esc_html_e('Open camera', 'dressme'); ?></span>
-                            </button>
-                            <label class="dressme-modal__action-button dressme-modal__upload">
-                                <span class="dressme-modal__action-icon" aria-hidden="true">↥</span>
-                                <span><?php esc_html_e('Upload photo', 'dressme'); ?></span>
-                                <input type="file" accept="image/*" data-dressme-file-input hidden>
-                            </label>
+            <div class="dressme-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="dressme-modal-title" data-dressme-state="idle">
+                <img class="dressme-modal__logo" src="<?php echo esc_url($logoUrl); ?>" alt="DressMe" data-dressme-logo>
+                <button type="button" class="dressme-modal__close" aria-label="<?php echo esc_attr__('Close DressMe modal', 'dressme'); ?>" data-dressme-close-modal>
+                    <img src="<?php echo esc_url($closeIconUrl); ?>" alt="" aria-hidden="true">
+                </button>
+
+                <div class="dressme-modal__stage dressme-modal__stage--idle" data-dressme-stage="idle">
+                    <div class="dressme-modal__header">
+                        <h3 id="dressme-modal-title"><?php esc_html_e('Try it on', 'dressme'); ?></h3>
+                        <p><?php esc_html_e('Add your photo, then generate a preview with this product.', 'dressme'); ?></p>
+                        <p class="dressme-modal__quota dressme-modal__quota--header">
+                            <?php
+                            printf(
+                                esc_html__('You have %d generations left today.', 'dressme'),
+                                $this->settingsRepository->getAnonymousDailyQuota()
+                            );
+                            ?>
+                        </p>
+                    </div>
+                    <div class="dressme-modal__grid">
+                        <div class="dressme-modal__panel">
+                            <h4><?php esc_html_e('Your photo', 'dressme'); ?></h4>
+                            <p data-dressme-camera-status><?php esc_html_e('Choose a photo from your camera or your device.', 'dressme'); ?></p>
+                            <div class="dressme-modal__actions">
+                                <label class="dressme-modal__action-button dressme-modal__upload" data-dressme-open-camera>
+                                    <span class="dressme-modal__action-icon" aria-hidden="true">
+                                        <img src="<?php echo esc_url($cameraIconUrl); ?>" alt="">
+                                    </span>
+                                    <span><?php esc_html_e('Open camera', 'dressme'); ?></span>
+                                    <input type="file" accept="image/*" capture="environment" data-dressme-camera-input hidden>
+                                </label>
+                                <label class="dressme-modal__action-button dressme-modal__upload">
+                                    <span class="dressme-modal__action-icon" aria-hidden="true">
+                                        <img src="<?php echo esc_url($uploadIconUrl); ?>" alt="">
+                                    </span>
+                                    <span><?php esc_html_e('Upload photo', 'dressme'); ?></span>
+                                    <input type="file" accept="image/*" data-dressme-file-input hidden>
+                                </label>
+                            </div>
+                            <div class="dressme-modal__preview" data-dressme-preview>
+                                <span><?php esc_html_e('Your photo will appear here.', 'dressme'); ?></span>
+                                <button type="button" class="dressme-modal__preview-remove" aria-label="<?php echo esc_attr__('Remove selected photo', 'dressme'); ?>" data-dressme-remove-photo hidden>
+                                    <img src="<?php echo esc_url($closeIconUrl); ?>" alt="" aria-hidden="true">
+                                </button>
+                            </div>
                         </div>
-                        <div class="dressme-modal__preview" data-dressme-preview>
-                            <span><?php esc_html_e('Your photo will appear here.', 'dressme'); ?></span>
-                            <button type="button" class="dressme-modal__preview-remove" aria-label="<?php echo esc_attr__('Remove selected photo', 'dressme'); ?>" data-dressme-remove-photo hidden>&times;</button>
+                        <div class="dressme-modal__panel">
+                            <h4><?php esc_html_e('Product preview', 'dressme'); ?></h4>
+                            <p class="dressme-modal__result-caption" data-dressme-result-caption>
+                                <?php esc_html_e('Here is the item you have selected for the virtual try on', 'dressme'); ?>
+                            </p>
+                            <div class="dressme-modal__result-media" data-dressme-result-media>
+                                <span><?php esc_html_e('Product preview unavailable.', 'dressme'); ?></span>
+                            </div>
+                            <div class="dressme-modal__product-copy">
+                                <h5 class="dressme-modal__product-title" data-dressme-product-title></h5>
+                                <p class="dressme-modal__product-description" data-dressme-product-description></p>
+                            </div>
+                            <button type="button" class="dressme-modal__generate-button" data-dressme-generate data-dressme-disabled-hint="<?php echo esc_attr__('Add your photo to generate your preview.', 'dressme'); ?>" disabled>
+                                <span><?php esc_html_e('Generate', 'dressme'); ?></span>
+                                <img src="<?php echo esc_url($generateIconUrl); ?>" alt="" aria-hidden="true">
+                            </button>
                         </div>
                     </div>
-                    <div class="dressme-modal__panel">
-                        <h4><?php esc_html_e('Product preview', 'dressme'); ?></h4>
-                        <p class="dressme-modal__result-caption" data-dressme-result-caption>
-                            <?php esc_html_e('Your generated preview will appear here.', 'dressme'); ?>
-                        </p>
-                        <div class="dressme-modal__result-media" data-dressme-result-media>
-                            <span><?php esc_html_e('Product preview unavailable.', 'dressme'); ?></span>
+                    <div class="dressme-modal__footer">
+                        <div class="dressme-modal__feedback-wrap">
+                            <p class="dressme-modal__feedback" data-dressme-feedback>
+                                <?php esc_html_e('Add your photo to generate your preview.', 'dressme'); ?>
+                            </p>
+                            <p class="dressme-modal__powered"><?php esc_html_e('Powered by DressMe', 'dressme'); ?></p>
                         </div>
-                        <div class="dressme-modal__product-copy">
-                            <h5 class="dressme-modal__product-title" data-dressme-product-title></h5>
-                            <p class="dressme-modal__product-description" data-dressme-product-description></p>
-                        </div>
-                        <button type="button" class="dressme-modal__generate-button" data-dressme-generate data-dressme-disabled-hint="<?php echo esc_attr__('Add your photo to generate your preview.', 'dressme'); ?>" disabled>
-                            <?php esc_html_e('Generate my look', 'dressme'); ?>
+                    </div>
+                </div>
+
+                <div class="dressme-modal__stage dressme-modal__stage--camera" data-dressme-stage="camera" hidden>
+                    <div class="dressme-modal__camera-frame">
+                        <video class="dressme-modal__camera-video" data-dressme-camera-video playsinline autoplay muted></video>
+                        <img class="dressme-modal__camera-snapshot" data-dressme-camera-snapshot alt="" hidden>
+                    </div>
+                    <div class="dressme-modal__camera-actions">
+                        <button type="button" class="dressme-modal__action-button" data-dressme-camera-cancel>
+                            <?php esc_html_e('Cancel', 'dressme'); ?>
+                        </button>
+                        <button type="button" class="dressme-modal__action-button dressme-modal__camera-shoot" data-dressme-camera-shoot>
+                            <?php esc_html_e('Take photo', 'dressme'); ?>
+                        </button>
+                        <button type="button" class="dressme-modal__action-button" data-dressme-camera-retake hidden>
+                            <?php esc_html_e('Retake', 'dressme'); ?>
+                        </button>
+                        <button type="button" class="dressme-modal__action-button dressme-modal__camera-shoot" data-dressme-camera-use hidden>
+                            <?php esc_html_e('Use this photo', 'dressme'); ?>
                         </button>
                     </div>
                 </div>
-                <div class="dressme-modal__generated-stage" data-dressme-generated-stage hidden>
-                    <div class="dressme-modal__generated-header">
-                        <div>
-                            <h4><?php esc_html_e('Generated preview', 'dressme'); ?></h4>
-                            <p data-dressme-generated-caption><?php esc_html_e('Your generated preview will appear here.', 'dressme'); ?></p>
-                        </div>
-                        <a class="dressme-modal__download-button" href="#" data-dressme-download hidden download>
+
+                <div class="dressme-modal__stage dressme-modal__stage--generating" data-dressme-stage="generating" aria-live="polite" hidden>
+                    <div class="dressme-loader" aria-hidden="true"></div>
+                    <p class="dressme-modal__generating-label"><?php esc_html_e('Generating your preview…', 'dressme'); ?></p>
+                    <p class="dressme-modal__timer" data-dressme-timer>0:00</p>
+                </div>
+
+                <div class="dressme-modal__stage dressme-modal__stage--result" data-dressme-stage="result" hidden>
+                    <div class="dressme-modal__result-header">
+                        <h4><?php esc_html_e('Your preview', 'dressme'); ?></h4>
+                        <a class="dressme-modal__download-button" href="#" data-dressme-download>
                             <?php esc_html_e('Download image', 'dressme'); ?>
                         </a>
                     </div>
-                    <div class="dressme-modal__generated-media" data-dressme-generated-media>
-                        <span><?php esc_html_e('Your generated preview will appear here.', 'dressme'); ?></span>
-                    </div>
-                </div>
-                <div class="dressme-modal__footer">
-                    <div class="dressme-modal__feedback-wrap">
-                        <p class="dressme-modal__feedback" data-dressme-feedback>
-                            <?php esc_html_e('Add your photo to generate your preview.', 'dressme'); ?>
-                        </p>
-                        <p class="dressme-modal__powered"><?php esc_html_e('Powered by DressMe', 'dressme'); ?></p>
-                    </div>
+                    <div class="dressme-modal__generated-media" data-dressme-generated-media></div>
                 </div>
             </div>
         </div>
         <?php
-    }
-
-    private function buildMissingConfigurationMessage(): string
-    {
-        $missingFields = $this->settingsRepository->getMissingConfigurationFields();
-
-        if ([] === $missingFields) {
-            return __('DressMe still needs the API URL and key before live generation can be enabled.', 'dressme');
-        }
-
-        if (['api_url'] === $missingFields) {
-            return __('DressMe still needs the API URL in WooCommerce settings before live generation can be enabled.', 'dressme');
-        }
-
-        if (['api_key'] === $missingFields) {
-            return __('DressMe still needs the API key in WooCommerce settings before live generation can be enabled.', 'dressme');
-        }
-
-        return __('DressMe still needs the API URL and key in WooCommerce settings before live generation can be enabled.', 'dressme');
     }
 
     private function resolveCurrentProduct(): ?\WC_Product

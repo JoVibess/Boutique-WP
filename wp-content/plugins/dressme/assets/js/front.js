@@ -96,6 +96,24 @@
     }
   }
 
+  function setStage(modal, state) {
+    const dialog = modal.querySelector(".dressme-modal__dialog");
+    if (!dialog) {
+      return;
+    }
+    dialog.setAttribute("data-dressme-state", state);
+    modal.querySelectorAll("[data-dressme-stage]").forEach(function (stage) {
+      stage.hidden = stage.getAttribute("data-dressme-stage") !== state;
+    });
+  }
+
+  function formatTimer(elapsedMs) {
+    const totalSeconds = Math.floor(elapsedMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  }
+
   function buildTryOnRequestBody(visitorId, customerImage) {
     const body = new URLSearchParams();
 
@@ -116,6 +134,17 @@
     body.set("job_id", jobId);
 
     return body;
+  }
+
+  function buildDownloadUrl(imageUrl, jobId) {
+    const params = new URLSearchParams();
+    params.set("action", "dressme_download_image");
+    params.set("nonce", config.downloadNonce || "");
+    params.set("image_url", imageUrl);
+    if (jobId) {
+      params.set("job_id", jobId);
+    }
+    return `${config.ajaxUrl}?${params.toString()}`;
   }
 
   function formatMessage(template, value) {
@@ -187,25 +216,20 @@
   }
 
   function clearGeneratedResult(modal) {
-    const generatedStage = modal.querySelector("[data-dressme-generated-stage]");
     const generatedMedia = modal.querySelector("[data-dressme-generated-media]");
     const generatedCaption = modal.querySelector("[data-dressme-generated-caption]");
     const downloadLink = modal.querySelector("[data-dressme-download]");
 
-    if (generatedStage) {
-      generatedStage.hidden = true;
-    }
-
     if (generatedMedia) {
-      generatedMedia.innerHTML = "<span>Your generated preview will appear here.</span>";
+      generatedMedia.innerHTML = "";
     }
 
     if (generatedCaption) {
-      generatedCaption.textContent = (config.messages && config.messages.previewDefault) || "Your generated preview will appear here.";
+      generatedCaption.textContent =
+        (config.messages && config.messages.previewDefault) || "Your generated preview will appear here.";
     }
 
     if (downloadLink) {
-      downloadLink.hidden = true;
       downloadLink.setAttribute("href", "#");
       downloadLink.removeAttribute("download");
     }
@@ -227,15 +251,61 @@
     const preview = modal.querySelector("[data-dressme-preview]");
     const feedback = modal.querySelector("[data-dressme-feedback]");
     const fileInput = modal.querySelector("[data-dressme-file-input]");
+    const cameraInput = modal.querySelector("[data-dressme-camera-input]");
+    const cameraLabel = modal.querySelector("[data-dressme-open-camera]");
+    const cameraVideo = modal.querySelector("[data-dressme-camera-video]");
+    const cameraSnapshot = modal.querySelector("[data-dressme-camera-snapshot]");
+    const cameraShootBtn = modal.querySelector("[data-dressme-camera-shoot]");
+    const cameraRetakeBtn = modal.querySelector("[data-dressme-camera-retake]");
+    const cameraUseBtn = modal.querySelector("[data-dressme-camera-use]");
+    const cameraCancelBtn = modal.querySelector("[data-dressme-camera-cancel]");
     const generateButton = modal.querySelector("[data-dressme-generate]");
     const cameraStatus = modal.querySelector("[data-dressme-camera-status]");
     const resultCaption = modal.querySelector("[data-dressme-result-caption]");
     const removePhotoButton = modal.querySelector("[data-dressme-remove-photo]");
+    const timerElement = modal.querySelector("[data-dressme-timer]");
     let statusPollTimer = null;
     let activeJobId = "";
     let pollRequestInFlight = false;
+    let timerIntervalId = null;
+    let timerStartedAt = 0;
+    let webcamStream = null;
+    let capturedDataUrl = "";
 
+    function isMobileDevice() {
+      if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
+        return navigator.userAgentData.mobile;
+      }
+      return window.matchMedia("(pointer: coarse)").matches;
+    }
+
+    const canUseDesktopWebcam =
+      !isMobileDevice() &&
+      typeof navigator.mediaDevices !== "undefined" &&
+      typeof navigator.mediaDevices.getUserMedia === "function";
+
+    setStage(modal, "idle");
     hydrateProductPreview(modal);
+
+    function startTimer() {
+      stopTimer();
+      timerStartedAt = Date.now();
+      if (timerElement) {
+        timerElement.textContent = "0:00";
+      }
+      timerIntervalId = window.setInterval(function () {
+        if (timerElement) {
+          timerElement.textContent = formatTimer(Date.now() - timerStartedAt);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerIntervalId) {
+        window.clearInterval(timerIntervalId);
+        timerIntervalId = null;
+      }
+    }
 
     function stopStatusPolling() {
       if (statusPollTimer) {
@@ -248,11 +318,15 @@
     }
 
     function scheduleNextStatusPoll(jobId, delay = 2500) {
-      stopStatusPolling();
+      if (statusPollTimer) {
+        window.clearTimeout(statusPollTimer);
+      }
       activeJobId = jobId;
       statusPollTimer = window.setTimeout(function () {
         refreshTryOnStatus(jobId).catch(function (error) {
           stopStatusPolling();
+          stopTimer();
+          setStage(modal, "idle");
           updateFeedback(modal, error.message || config.messages.statusFailed);
 
           if (selectedCustomerImage) {
@@ -264,15 +338,23 @@
 
     function resetModalState() {
       stopStatusPolling();
+      stopTimer();
+      stopWebcam();
+      resetCameraStageUi();
       selectedCustomerImage = "";
 
       if (fileInput) {
         fileInput.value = "";
       }
 
+      if (cameraInput) {
+        cameraInput.value = "";
+      }
+
       resetPreview(preview, removePhotoButton);
       clearGeneratedResult(modal);
       hydrateProductPreview(modal);
+      setStage(modal, "idle");
 
       if (resultCaption) {
         resultCaption.textContent = config.messages.previewDefault || "Your generated preview will appear here.";
@@ -284,10 +366,7 @@
 
       if (config.isConfigured) {
         generateButton.setAttribute("disabled", "disabled");
-        updateFeedback(
-          modal,
-          `Configuration prête. Quota anonyme actuel: ${config.anonymousDailyQuota} génération(s) par jour.`
-        );
+        updateFeedback(modal, config.messages.missingPhoto);
       } else {
         generateButton.setAttribute("disabled", "disabled");
         updateFeedback(modal, getNotConfiguredMessage());
@@ -370,7 +449,9 @@
 
       if (data.status === "completed" && data.generated_image_url) {
         stopStatusPolling();
-        setResultImage(modal, data.generated_image_url, config.messages.completed);
+        stopTimer();
+        setResultImage(modal, data.generated_image_url, jobId, config.messages.completed);
+        setStage(modal, "result");
         updateFeedback(modal, config.messages.completed);
 
         if (selectedCustomerImage) {
@@ -382,6 +463,8 @@
 
       if (data.status === "failed" || data.status === "rejected") {
         stopStatusPolling();
+        stopTimer();
+        setStage(modal, "idle");
         updateFeedback(modal, data.error_message || config.messages.failed);
 
         if (selectedCustomerImage) {
@@ -408,24 +491,117 @@
       });
     });
 
-    modal.querySelector("[data-dressme-open-camera]")?.addEventListener("click", async function () {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        cameraStatus.textContent = config.messages.cameraUnavailable;
+    function stopWebcam() {
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        webcamStream = null;
+      }
+      if (cameraVideo) {
+        cameraVideo.srcObject = null;
+      }
+    }
+
+    function resetCameraStageUi() {
+      capturedDataUrl = "";
+      if (cameraSnapshot) {
+        cameraSnapshot.hidden = true;
+        cameraSnapshot.src = "";
+      }
+      if (cameraVideo) {
+        cameraVideo.hidden = false;
+      }
+      if (cameraShootBtn) cameraShootBtn.hidden = false;
+      if (cameraCancelBtn) cameraCancelBtn.hidden = false;
+      if (cameraRetakeBtn) cameraRetakeBtn.hidden = true;
+      if (cameraUseBtn) cameraUseBtn.hidden = true;
+    }
+
+    async function openDesktopWebcam() {
+      resetCameraStageUi();
+      setStage(modal, "camera");
+      try {
+        webcamStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } },
+          audio: false,
+        });
+        if (cameraVideo) {
+          cameraVideo.srcObject = webcamStream;
+          await cameraVideo.play().catch(function () {});
+        }
+      } catch (error) {
+        stopWebcam();
+        setStage(modal, "idle");
+        if (cameraInput) {
+          cameraInput.click();
+        }
+      }
+    }
+
+    function takeSnapshot() {
+      if (!cameraVideo || !cameraVideo.videoWidth) {
         return;
       }
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        cameraStatus.textContent = "Camera ready. Capture will be available here soon.";
-        stream.getTracks().forEach((track) => track.stop());
-      } catch (error) {
-        cameraStatus.textContent = "Camera access was denied. You can still upload a photo.";
+      const canvas = document.createElement("canvas");
+      const width = cameraVideo.videoWidth;
+      const height = cameraVideo.videoHeight;
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        return;
       }
-    });
+      ctx.drawImage(cameraVideo, 0, 0, width, height);
+      capturedDataUrl = canvas.toDataURL("image/jpeg", 0.92);
 
-    fileInput?.addEventListener("change", function (event) {
-      const [file] = event.target.files || [];
+      if (cameraSnapshot) {
+        cameraSnapshot.src = capturedDataUrl;
+        cameraSnapshot.hidden = false;
+      }
+      if (cameraVideo) {
+        cameraVideo.hidden = true;
+      }
+      if (cameraShootBtn) cameraShootBtn.hidden = true;
+      if (cameraCancelBtn) cameraCancelBtn.hidden = true;
+      if (cameraRetakeBtn) cameraRetakeBtn.hidden = false;
+      if (cameraUseBtn) cameraUseBtn.hidden = false;
+    }
 
+    function retakeSnapshot() {
+      capturedDataUrl = "";
+      if (cameraSnapshot) {
+        cameraSnapshot.hidden = true;
+        cameraSnapshot.src = "";
+      }
+      if (cameraVideo) {
+        cameraVideo.hidden = false;
+        cameraVideo.play().catch(function () {});
+      }
+      if (cameraShootBtn) cameraShootBtn.hidden = false;
+      if (cameraCancelBtn) cameraCancelBtn.hidden = false;
+      if (cameraRetakeBtn) cameraRetakeBtn.hidden = true;
+      if (cameraUseBtn) cameraUseBtn.hidden = true;
+    }
+
+    async function useCapturedPhoto() {
+      if (!capturedDataUrl) {
+        return;
+      }
+      const blob = await (await fetch(capturedDataUrl)).blob();
+      const file = new File([blob], "dressme-camera.jpg", { type: "image/jpeg" });
+      stopWebcam();
+      setStage(modal, "idle");
+      handleFileSelection(file);
+    }
+
+    function cancelCamera() {
+      stopWebcam();
+      resetCameraStageUi();
+      setStage(modal, "idle");
+    }
+
+    function handleFileSelection(file) {
       if (!file) {
         return;
       }
@@ -453,11 +629,38 @@
         .catch(function () {
           updateFeedback(modal, config.messages.failed);
         });
+    }
+
+    fileInput?.addEventListener("change", function (event) {
+      const [file] = event.target.files || [];
+      handleFileSelection(file);
     });
+
+    cameraInput?.addEventListener("change", function (event) {
+      const [file] = event.target.files || [];
+      handleFileSelection(file);
+    });
+
+    if (canUseDesktopWebcam && cameraLabel) {
+      cameraLabel.addEventListener("click", function (event) {
+        event.preventDefault();
+        openDesktopWebcam();
+      });
+    }
+
+    cameraShootBtn?.addEventListener("click", takeSnapshot);
+    cameraRetakeBtn?.addEventListener("click", retakeSnapshot);
+    cameraUseBtn?.addEventListener("click", useCapturedPhoto);
+    cameraCancelBtn?.addEventListener("click", cancelCamera);
 
     removePhotoButton?.addEventListener("click", function () {
       selectedCustomerImage = "";
-      fileInput.value = "";
+      if (fileInput) {
+        fileInput.value = "";
+      }
+      if (cameraInput) {
+        cameraInput.value = "";
+      }
       resetPreview(preview, removePhotoButton);
       clearGeneratedResult(modal);
       stopStatusPolling();
@@ -478,6 +681,8 @@
 
       generateButton.setAttribute("disabled", "disabled");
       updateFeedback(modal, config.messages.sending);
+      setStage(modal, "generating");
+      startTimer();
 
       try {
         const response = await fetch(config.ajaxUrl, {
@@ -508,22 +713,19 @@
           });
         }
       } catch (error) {
+        stopTimer();
+        setStage(modal, "idle");
         updateFeedback(modal, error.message || config.messages.failed);
         generateButton.removeAttribute("disabled");
       }
     });
   });
 
-  function setResultImage(modal, imageUrl, caption) {
-    const generatedStage = modal.querySelector("[data-dressme-generated-stage]");
+  function setResultImage(modal, imageUrl, jobId, caption) {
     const generatedMedia = modal.querySelector("[data-dressme-generated-media]");
     const generatedCaption = modal.querySelector("[data-dressme-generated-caption]");
     const downloadLink = modal.querySelector("[data-dressme-download]");
     const product = config.productPayload || {};
-
-    if (generatedStage) {
-      generatedStage.hidden = false;
-    }
 
     if (generatedMedia && imageUrl) {
       generatedMedia.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(
@@ -536,9 +738,11 @@
     }
 
     if (downloadLink && imageUrl) {
-      downloadLink.hidden = false;
-      downloadLink.setAttribute("href", imageUrl);
-      downloadLink.setAttribute("download", `${(product.product_title || "dressme-look").replace(/[^a-z0-9_-]+/gi, "-").toLowerCase()}.jpg`);
+      downloadLink.setAttribute("href", buildDownloadUrl(imageUrl, jobId));
+      downloadLink.setAttribute(
+        "download",
+        `${(product.product_title || "dressme-look").replace(/[^a-z0-9_-]+/gi, "-").toLowerCase()}.jpg`
+      );
     }
   }
 })();

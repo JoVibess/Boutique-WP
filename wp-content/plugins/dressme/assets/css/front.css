@@ -1,3 +1,35 @@
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("../font/RedHatDisplay-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("../font/RedHatDisplay-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("../font/RedHatDisplay-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Red Hat Display";
+  src: url("../font/RedHatDisplay-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 .dressme-tryon-button,
 button.dressme-tryon-button,
 .single-product-page .dressme-tryon-button {
@@ -45,6 +77,7 @@ button.dressme-tryon-button:focus {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  font-family: "Red Hat Display", sans-serif;
 }
 
 .dressme-modal__backdrop {
@@ -58,12 +91,176 @@ button.dressme-tryon-button:focus {
   z-index: 1;
   width: min(900px, calc(100vw - 56px));
   max-height: calc(100vh - 64px);
-  overflow: auto;
   margin: 0;
-  padding: 28px;
+  padding: 28px 28px 28px 28px;
   border-radius: 24px;
   background: #ffffff;
   box-shadow: 0 32px 90px rgba(12, 18, 32, 0.24);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dressme-modal__logo {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+.dressme-modal__stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.dressme-modal__stage[hidden] {
+  display: none;
+}
+
+.dressme-modal__dialog[data-dressme-state="camera"] .dressme-modal__stage--idle,
+.dressme-modal__dialog[data-dressme-state="generating"] .dressme-modal__stage--idle,
+.dressme-modal__dialog[data-dressme-state="result"] .dressme-modal__stage--idle {
+  display: none;
+}
+
+.dressme-modal__stage--idle {
+  overflow: auto;
+  padding-top: 40px;
+}
+
+.dressme-modal__stage--generating {
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  min-height: 360px;
+  padding: 40px 24px;
+  background: #ffffff;
+  animation: dressmeFadeIn 0.35s ease both;
+}
+
+.dressme-modal__stage--camera {
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 56px 16px 16px;
+  animation: dressmeFadeIn 0.25s ease both;
+}
+
+.dressme-modal__camera-frame {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 3 / 4;
+  background: #000;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.dressme-modal__camera-video,
+.dressme-modal__camera-snapshot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.dressme-modal__camera-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+.dressme-modal__camera-actions .dressme-modal__action-button {
+  flex: 1 1 140px;
+  min-height: 48px;
+}
+
+.dressme-modal__camera-shoot {
+  background: #111111 !important;
+  color: #ffffff !important;
+  border-color: #111111 !important;
+}
+
+.dressme-modal__camera-shoot:hover {
+  background: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.dressme-modal__stage--result {
+  gap: 14px;
+  margin-top: 46px;
+  min-height: 0;
+  animation: dressmeFadeIn 0.35s ease both;
+}
+
+@keyframes dressmeFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dressme-loader {
+  width: 32px;
+  aspect-ratio: 1;
+  display: grid;
+}
+.dressme-loader::before,
+.dressme-loader::after {
+  content: "";
+  grid-area: 1/1;
+  background: #111111;
+  clip-path: polygon(0 0, 101% 0, 0 100%);
+  animation: dressmeLoader 2s infinite;
+}
+.dressme-loader::after { --s: -1, -1; }
+@keyframes dressmeLoader {
+  0%, 10%   { transform: scale(var(--s,1)) translate(0,0)        rotate(0deg); }
+  33%       { transform: scale(var(--s,1)) translate(20px,-20px) rotate(0deg); }
+  66%       { transform: scale(var(--s,1)) translate(20px,-20px) rotate(180deg); }
+  90%, 100% { transform: scale(var(--s,1)) translate(0,0)        rotate(180deg); }
+}
+
+.dressme-modal__generating-label {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #173042;
+  letter-spacing: -0.01em;
+}
+
+.dressme-modal__timer {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: #8aa0b0;
+  letter-spacing: 0.04em;
+}
+
+.dressme-modal__result-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.dressme-modal__result-header h4 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+  text-align: center;
 }
 
 .dressme-modal__close {
@@ -75,14 +272,22 @@ button.dressme-tryon-button:focus {
   border: 1px solid #dde5ec;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
-  font-size: 28px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   cursor: pointer;
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
+.dressme-modal__close img {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
 .dressme-modal__close:hover {
-  background: #f4f7fb;
+  background: #f6f6f6;
   transform: scale(1.03);
 }
 
@@ -115,8 +320,7 @@ button.dressme-tryon-button:focus {
   padding: 22px;
   border: 1px solid #d9e1e8;
   border-radius: 22px;
-  background: linear-gradient(180deg, #fcfdff 0%, #f4f8fb 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: linear-gradient(180deg, #fcfdff 0%, #fbf9f4 100%);
 }
 
 .dressme-modal__panel h4 {
@@ -129,6 +333,7 @@ button.dressme-tryon-button:focus {
   margin: 0;
   color: #647989;
   line-height: 1.5;
+  font-size: clamp(0.8125rem, 0.7529rem + 0.1908vw, 0.875rem);
 }
 
 .dressme-modal__actions {
@@ -149,7 +354,7 @@ button.dressme-tryon-button:focus {
   padding: 0 18px;
   border: 1px solid #d7e0e7;
   border-radius: 16px;
-  background: #ffffff;
+  background: transparent;
   color: #13202b;
   font-size: 15px;
   font-weight: 600;
@@ -160,9 +365,9 @@ button.dressme-tryon-button:focus {
 }
 
 .dressme-modal__action-button:hover {
-  border-color: #bccad6;
+  border-color: #c6c6c6;
   background: #f8fbfd;
-  box-shadow: 0 12px 24px rgba(12, 18, 32, 0.08);
+  box-shadow: rgba(67, 65, 0, 0.09) 0px 3px 12px; 
   transform: translateY(-1px);
 }
 
@@ -173,10 +378,15 @@ button.dressme-tryon-button:focus {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #eef4f8;
   color: #476579;
   font-size: 15px;
   flex: 0 0 24px;
+}
+
+.dressme-modal__action-icon img {
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 .dressme-modal__upload {
@@ -219,15 +429,20 @@ button.dressme-tryon-button:focus {
   border: 0;
   border-radius: 999px;
   background: rgba(17, 17, 17, 0.88);
-  color: #ffffff;
-  font-size: 22px;
-  line-height: 1;
+  padding: 0;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(12, 18, 32, 0.2);
 }
 
+.dressme-modal__preview-remove img {
+  width: 12px;
+  height: 12px;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
 .dressme-modal__result-caption {
-  margin: 0 0 22px;
+  margin-bottom: 14px !important;
   color: #617685;
   line-height: 1.5;
 }
@@ -287,23 +502,34 @@ button.dressme-tryon-button:focus {
   margin-top: 18px;
   border: 0;
   border-radius: 18px;
-  background: linear-gradient(135deg, #111111 0%, #243646 100%);
+  background: #f7d100;
   color: #ffffff;
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   cursor: pointer;
-  box-shadow: 0 18px 36px rgba(17, 17, 17, 0.18);
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.dressme-modal__generate-button img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex: 0 0 auto;
+  filter: brightness(0) invert(1);
 }
 
 .dressme-modal__generate-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 22px 40px rgba(17, 17, 17, 0.22);
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
 }
 
 .dressme-modal__generate-button:disabled {
-  opacity: 0.42;
+  opacity: 0.6;
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -312,7 +538,7 @@ button.dressme-tryon-button:focus {
   content: attr(data-dressme-disabled-hint);
   position: absolute;
   left: 50%;
-  top: calc(100% + 12px);
+  top: calc(100% + 20px);
   transform: translateX(-50%);
   min-width: 220px;
   max-width: 280px;
@@ -324,7 +550,6 @@ button.dressme-tryon-button:focus {
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
-  box-shadow: 0 14px 28px rgba(12, 18, 32, 0.12);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -351,7 +576,7 @@ button.dressme-tryon-button:focus {
 
 .dressme-modal__powered {
   margin: 0;
-  font-size: 11px;
+  font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #8aa0b0;
@@ -361,37 +586,9 @@ button.dressme-tryon-button:focus {
   margin-top: 18px;
 }
 
-.dressme-modal__generated-stage {
-  margin-top: 20px;
-  padding: 22px;
-  border: 1px solid #d9e1e8;
-  border-radius: 22px;
-  background: linear-gradient(180deg, #fcfdff 0%, #f4f8fb 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.dressme-modal__generated-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.dressme-modal__generated-header h4 {
-  margin: 0 0 6px;
-  font-size: 22px;
-  letter-spacing: -0.03em;
-}
-
-.dressme-modal__generated-header p {
-  margin: 0;
-  color: #617685;
-  line-height: 1.5;
-}
-
 .dressme-modal__generated-media {
-  min-height: 420px;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -399,15 +596,15 @@ button.dressme-tryon-button:focus {
   border: 1px solid #d9e1e8;
   border-radius: 18px;
   background: #ffffff;
-  padding: 18px;
 }
 
 .dressme-modal__generated-media img {
   display: block;
   width: 100%;
-  max-height: 70vh;
+  height: 100%;
+  max-height: 100%;
   object-fit: contain;
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .dressme-modal__download-button {
@@ -463,11 +660,7 @@ button.dressme-tryon-button:focus {
     align-items: stretch;
   }
 
-  .dressme-modal__generated-header {
-    flex-direction: column;
-  }
-
-  .dressme-modal__generated-media {
+  .dressme-modal__stage--generating {
     min-height: 280px;
   }
 }

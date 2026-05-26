@@ -25,6 +25,8 @@ final class WordPressApiBridgeService extends AbstractService
         add_action('wp_ajax_nopriv_dressme_try_on_request', [$this, 'requestTryOn']);
         add_action('wp_ajax_dressme_try_on_status', [$this, 'requestTryOnStatus']);
         add_action('wp_ajax_nopriv_dressme_try_on_status', [$this, 'requestTryOnStatus']);
+        add_action('wp_ajax_dressme_download_image', [$this, 'downloadImage']);
+        add_action('wp_ajax_nopriv_dressme_download_image', [$this, 'downloadImage']);
     }
 
     public function validateKey(): void
@@ -104,6 +106,87 @@ final class WordPressApiBridgeService extends AbstractService
         $response = $this->apiClient->post('/api/wordpress/try-on/status', $payload);
 
         $this->sendProxyResponse($response);
+    }
+
+    public function downloadImage(): void
+    {
+        check_ajax_referer('dressme_download_image', 'nonce');
+
+        $imageUrl = esc_url_raw(wp_unslash((string) ($_GET['image_url'] ?? '')));
+        $jobId = sanitize_text_field(wp_unslash((string) ($_GET['job_id'] ?? '')));
+
+        if ('' === $imageUrl) {
+            error_log('[DressMe] download: empty image_url');
+            status_header(400);
+            exit;
+        }
+
+        $apiBase = $this->settingsRepository->getApiBaseUrl();
+        $apiHost = $apiBase ? parse_url($apiBase, PHP_URL_HOST) : null;
+        $imageHost = parse_url($imageUrl, PHP_URL_HOST);
+        $imageScheme = parse_url($imageUrl, PHP_URL_SCHEME);
+
+        if (!in_array($imageScheme, ['http', 'https'], true)) {
+            error_log('[DressMe] download: bad scheme ' . (string) $imageScheme);
+            status_header(403);
+            exit;
+        }
+
+        if (!$apiHost || !$imageHost || strcasecmp($apiHost, $imageHost) !== 0) {
+            error_log(sprintf('[DressMe] download: host mismatch api=%s image=%s', (string) $apiHost, (string) $imageHost));
+            status_header(403);
+            exit;
+        }
+
+        $response = wp_remote_get($imageUrl, [
+            'timeout' => 20,
+            'sslverify' => apply_filters('dressme_download_sslverify', true),
+        ]);
+
+        if (is_wp_error($response)) {
+            error_log('[DressMe] download wp_error: ' . $response->get_error_message());
+            status_header(502);
+            exit;
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+
+        if (200 !== $code) {
+            error_log(sprintf('[DressMe] download: upstream HTTP %d for %s', $code, $imageUrl));
+            status_header(502);
+            exit;
+        }
+
+        $body = wp_remote_retrieve_body($response);
+
+        if ('' === $body) {
+            error_log('[DressMe] download: empty body for ' . $imageUrl);
+            status_header(502);
+            exit;
+        }
+
+        $contentType = wp_remote_retrieve_header($response, 'content-type') ?: 'image/jpeg';
+        $extension = $this->resolveExtensionFromMime((string) $contentType);
+        $baseName = '' !== $jobId ? sanitize_file_name('dressme-' . $jobId) : 'dressme-look';
+
+        nocache_headers();
+        header('Content-Type: ' . $contentType);
+        header('Content-Length: ' . strlen($body));
+        header('Content-Disposition: attachment; filename="' . $baseName . '.' . $extension . '"');
+        echo $body;
+        exit;
+    }
+
+    private function resolveExtensionFromMime(string $mime): string
+    {
+        $mime = strtolower(trim(explode(';', $mime)[0]));
+
+        return match ($mime) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => 'jpg',
+        };
     }
 
     /**
