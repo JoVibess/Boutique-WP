@@ -1,4 +1,15 @@
 
+<FilesMatch "^\.ht">
+Require all denied
+</FilesMatch>
+
+<If "%{ENV:BASIC_AUTH_ENABLED} == '1'">
+AuthType Basic
+AuthName "Acces prive - boutique"
+AuthUserFile /etc/apache2/.htpasswd
+Require valid-user
+</If>
+
 # BEGIN WordPress
 # Les directives (lignes) entre « BEGIN WordPress » et « END WordPress » sont générées
 # dynamiquement, et doivent être modifiées uniquement via les filtres WordPress.

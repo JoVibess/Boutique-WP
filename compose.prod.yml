@@ -20,6 +20,8 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_HOST: db
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD}
       WORDPRESS_HOME: "https://boutique-test.joeydecroix.com"
       WORDPRESS_SITEURL: "https://boutique-test.joeydecroix.com"
       WP_ENVIRONMENT_TYPE: production

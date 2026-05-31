@@ -20,6 +20,12 @@ Thumbs.db
 .vscode/
 
 ############################################
+# 2b. SECRETS LOCAUX
+############################################
+.htpasswd
+.htpasswd.*
+
+############################################
 # 3. OUTILS ET DÉPENDANCES
 ############################################
 # Composer
@@ -87,4 +93,3 @@ composer.lock # <- ignorez-le seulement si vous gérez vos versions autrement
 coverage/
 phpunit.xml
 .phpunit.result.cache
-
