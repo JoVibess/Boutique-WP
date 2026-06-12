@@ -9,6 +9,7 @@ final class Options
     public const ANONYMOUS_DAILY_QUOTA = 'dressme_anonymous_daily_quota';
     public const API_BASE_URL = 'dressme_api_base_url';
     public const API_KEY = 'dressme_api_key';
+    public const API_SECRET = 'dressme_api_secret';
     public const ENVIRONMENT = 'dressme_environment';
     public const BUTTON_WIDTH = 'dressme_button_width';
     public const BUTTON_HEIGHT = 'dressme_button_height';
@@ -48,6 +49,7 @@ final class Options
             self::ANONYMOUS_DAILY_QUOTA => 20,
             self::API_BASE_URL => '',
             self::API_KEY => '',
+            self::API_SECRET => '',
             self::ENVIRONMENT => 'test',
             self::BUTTON_WIDTH => '100%',
             self::BUTTON_HEIGHT => '52',

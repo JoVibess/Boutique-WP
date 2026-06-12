@@ -92,6 +92,23 @@ final class WooCommerceSettingsService extends AbstractService
                     <td>
                         <input type="text" class="regular-text code" name="<?php echo esc_attr(Options::API_KEY); ?>" value="<?php echo esc_attr((string) $values[Options::API_KEY]); ?>">
                         <p class="description"><?php esc_html_e('Each WooCommerce store will be linked to its own DressMe key.', 'dressme'); ?></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e('DressMe API secret', 'dressme'); ?></th>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;max-width:420px;">
+                            <input
+                                type="password"
+                                class="regular-text code"
+                                name="<?php echo esc_attr(Options::API_SECRET); ?>"
+                                value="<?php echo esc_attr((string) $values[Options::API_SECRET]); ?>"
+                                autocomplete="new-password"
+                                data-dressme-api-secret
+                            >
+                            <button type="button" class="button" data-dressme-toggle-secret aria-label="<?php esc_attr_e('Show or hide API secret', 'dressme'); ?>">👁</button>
+                        </div>
+                        <p class="description"><?php esc_html_e('Shared secret used to sign requests between this WooCommerce store and the DressMe API.', 'dressme'); ?></p>
                         <p>
                             <button type="button" class="button" data-dressme-validate-key><?php esc_html_e('Validate API key', 'dressme'); ?></button>
                             <span class="dressme-api-validation-result" data-dressme-validation-result></span>
@@ -255,6 +272,7 @@ final class WooCommerceSettingsService extends AbstractService
         update_option(Options::ENVIRONMENT, in_array((string) ($_POST[Options::ENVIRONMENT] ?? 'test'), ['test', 'production'], true) ? sanitize_text_field(wp_unslash((string) $_POST[Options::ENVIRONMENT])) : 'test', false);
         update_option(Options::API_BASE_URL, esc_url_raw(untrailingslashit(wp_unslash((string) ($_POST[Options::API_BASE_URL] ?? '')))), false);
         update_option(Options::API_KEY, sanitize_text_field(wp_unslash((string) ($_POST[Options::API_KEY] ?? ''))), false);
+        update_option(Options::API_SECRET, sanitize_text_field(wp_unslash((string) ($_POST[Options::API_SECRET] ?? ''))), false);
         update_option(Options::BUTTON_WIDTH, sanitize_text_field(wp_unslash((string) ($_POST[Options::BUTTON_WIDTH] ?? '100%'))), false);
         update_option(Options::BUTTON_HEIGHT, max(32, absint((string) ($_POST[Options::BUTTON_HEIGHT] ?? 52))), false);
         update_option(Options::BUTTON_RADIUS, max(0, absint((string) ($_POST[Options::BUTTON_RADIUS] ?? 8))), false);

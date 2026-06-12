@@ -99,6 +99,7 @@
     const $previewButton = $("[data-dressme-button-preview]");
     const $validateButton = $("[data-dressme-validate-key]");
     const $validationResult = $("[data-dressme-validation-result]");
+    const $apiSecretInput = $("[data-dressme-api-secret]");
 
     function updateButtonPreview() {
       if (!$previewButton.length) {
@@ -192,6 +193,15 @@
       updateButtonPreview
     );
 
+    $(document).on("click", "[data-dressme-toggle-secret]", function () {
+      if (!$apiSecretInput.length) {
+        return;
+      }
+
+      const nextType = $apiSecretInput.attr("type") === "password" ? "text" : "password";
+      $apiSecretInput.attr("type", nextType);
+    });
+
     $validateButton.on("click", function () {
       if (!window.dressmeAdmin || !$validationResult.length) {
         return;
@@ -205,6 +215,7 @@
         nonce: dressmeAdmin.validateNonce,
         api_base_url: $('input[name="dressme_api_base_url"]').val() || "",
         api_key: $('input[name="dressme_api_key"]').val() || "",
+        api_secret: $('input[name="dressme_api_secret"]').val() || "",
       })
         .done(function (response) {
           const data = response && response.data ? response.data : {};

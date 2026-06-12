@@ -203,7 +203,11 @@
       return "DressMe is missing the API key in WooCommerce settings.";
     }
 
-    return "DressMe is missing both the API URL and the API key in WooCommerce settings.";
+    if (missingFields.length === 1 && missingFields[0] === "api_secret") {
+      return "DressMe is missing the API secret in WooCommerce settings.";
+    }
+
+    return "DressMe is missing one or more API credentials in WooCommerce settings.";
   }
 
   function resetPreview(preview, removePhotoButton) {

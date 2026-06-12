@@ -41,12 +41,19 @@ final class WordPressApiBridgeService extends AbstractService
         }
 
         $apiKey = sanitize_text_field(wp_unslash((string) ($_POST['api_key'] ?? $this->settingsRepository->getApiKey())));
+        $apiSecret = sanitize_text_field(wp_unslash((string) ($_POST['api_secret'] ?? $this->settingsRepository->getApiSecret())));
         $apiBaseUrl = esc_url_raw(untrailingslashit(wp_unslash((string) ($_POST['api_base_url'] ?? $this->settingsRepository->getApiBaseUrl()))));
 
-        $response = $this->apiClient->postToBaseUrl($apiBaseUrl, '/api/wordpress/validate-key', [
-            'api_key' => $apiKey,
-            'site_url' => home_url(),
-        ]);
+        $response = $this->apiClient->postToBaseUrl(
+            $apiBaseUrl,
+            '/api/wordpress/validate-key',
+            [
+                'api_key' => $apiKey,
+                'site_url' => home_url(),
+            ],
+            $apiKey,
+            $apiSecret,
+        );
 
         $this->sendProxyResponse($response);
     }

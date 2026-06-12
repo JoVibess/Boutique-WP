@@ -22,7 +22,7 @@ final class SettingsRepository
 
     public function isConfigured(): bool
     {
-        return '' !== $this->getApiKey() && '' !== $this->getApiBaseUrl();
+        return '' !== $this->getApiKey() && '' !== $this->getApiSecret() && '' !== $this->getApiBaseUrl();
     }
 
     /**
@@ -40,6 +40,10 @@ final class SettingsRepository
             $missing[] = 'api_key';
         }
 
+        if ('' === $this->getApiSecret()) {
+            $missing[] = 'api_secret';
+        }
+
         return $missing;
     }
 
@@ -51,6 +55,11 @@ final class SettingsRepository
     public function getApiBaseUrl(): string
     {
         return untrailingslashit(trim((string) $this->get(Options::API_BASE_URL)));
+    }
+
+    public function getApiSecret(): string
+    {
+        return trim((string) $this->get(Options::API_SECRET));
     }
 
     public function getButtonLabel(): string
