@@ -39,6 +39,8 @@ services:
   www:
     build: ./docker/php
     container_name: www_docker_change-me-wp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "80:80"
     volumes:
